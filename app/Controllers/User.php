@@ -1,35 +1,36 @@
 <?php
 
-namespace App\Controllers; // Pastikan namespace ini sesuai
+namespace App\Controllers;
 
-use App\Controllers\BaseController; // Menggunakan BaseController yang baru
-use PragmaRX\Google2FA\Google2FA; // Untuk MFA
+use App\Controllers\BaseController;
+use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Writer;
 
-class User extends BaseController // Meng-extend BaseController
+class User extends BaseController
 {
     protected $session;
     protected $db;
-    protected $validation; // Properti untuk validasi
-    protected $router; // Diperlukan untuk router service
+    protected $validation;
 
     public function __construct()
     {
-        // Konstruktor kosong karena inisialisasi dasar ditangani oleh BaseController
+        // Constructor kosong karena inisialisasi dasar ditangani oleh BaseController
     }
 
     public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
 
-        $this->validation = \Config\Services::validation(); // Inisialisasi validasi
-        $this->router = \Config\Services::router(); // Inisialisasi router service
+        // Inisialisasi services
+        $this->session = \Config\Services::session();
+        $this->db = \Config\Database::connect();
+        $this->validation = \Config\Services::validation();
 
-        // Helper url, form, dan download sudah dimuat di BaseController::$helpers
-        // Pastikan juga repack_helper sudah dimuat di BaseController::$helpers
+        // Load helpers
+        helper(['url', 'form', 'download']);
 
         $this->_check_auth(); // Panggil fungsi otentikasi di initController
     }
@@ -45,7 +46,7 @@ class User extends BaseController // Meng-extend BaseController
         if (empty($data['user']['google2fa_secret'])) {
             $secretKey = $google2fa->generateSecretKey();
             $this->db->table('user')->where('id', $data['user']['id'])->update(['google2fa_secret' => $secretKey]);
-            $data['user']['google2fa_secret'] = $secretKey; // Update data user di array agar QR code terbuat
+            $data['user']['google2fa_secret'] = $secretKey;
         } else {
             $secretKey = $data['user']['google2fa_secret'];
         }
@@ -66,11 +67,7 @@ class User extends BaseController // Meng-extend BaseController
         $data['qr_code_data_uri'] = $qrCodeDataUri;
         $data['secret_key'] = $secretKey;
 
-        echo view('templates/header', $data);
-        echo view('templates/sidebar', $data);
-        echo view('templates/topbar', $data);
-        echo view('user/mfa_setup', $data);
-        echo view('templates/footer');
+        return view('user/mfa_setup', $data);
     }
 
     public function verify_mfa()
@@ -115,9 +112,6 @@ class User extends BaseController // Meng-extend BaseController
 
     private function _check_auth()
     {
-        // PENTING: Pastikan Anda memuat helper 'url' di BaseController atau di sini
-        // $this->load->helper('url'); // Sudah dimuat di BaseController
-
         // Periksa apakah session email ada, jika tidak, arahkan ke halaman login
         if (!$this->session->get('email')) {
             $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Mohon login untuk melanjutkan.</div>');
@@ -126,7 +120,7 @@ class User extends BaseController // Meng-extend BaseController
 
         // Periksa role_id pengguna
         $role_id_session = $this->session->get('role_id');
-        if (($role_id_session ?? null) != 2) { // Menggunakan null coalescing operator untuk keamanan
+        if (($role_id_session ?? null) != 2) {
             $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Anda tidak diotorisasi untuk mengakses halaman ini.</div>');
             if ($role_id_session == 1) return redirect()->to(base_url('admin'));
             elseif ($role_id_session == 3) return redirect()->to(base_url('petugas'));
@@ -136,11 +130,10 @@ class User extends BaseController // Meng-extend BaseController
 
         // Periksa status aktif pengguna dan metode yang diizinkan untuk pengguna tidak aktif
         $user_is_active = $this->session->get('is_active');
-        $current_method = $this->router->methodName(); // Menggunakan methodName() di CI4
-        $allowed_inactive_methods = ['edit', 'logout', 'ganti_password', 'force_change_password_page']; // Tambahkan 'force_change_password_page'
+        $current_method = $this->request->getUri()->getSegment(2); // Menggunakan getSegment untuk mendapatkan method
+        $allowed_inactive_methods = ['edit', 'logout', 'ganti_password', 'force_change_password_page'];
 
-        if (($user_is_active ?? null) == 0 && !in_array($current_method, $allowed_inactive_methods)) { // Menggunakan null coalescing
-            // Pengecekan spesifik untuk user/edit tidak lagi diperlukan karena edit sudah di allowed_inactive_methods
+        if (($user_is_active ?? null) == 0 && !in_array($current_method, $allowed_inactive_methods)) {
             $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Akun Anda belum aktif. Mohon lengkapi profil perusahaan Anda.</div>');
             return redirect()->to(base_url('user/edit'));
         }
@@ -189,17 +182,12 @@ class User extends BaseController // Meng-extend BaseController
             $data['recent_permohonan'] = $builder->get()->getResultArray();
         } else {
             $data['recent_permohonan'] = [];
-            // Gunakan null coalescing operator untuk menghindari notice jika 'is_active' tidak ada
             if (($data['user']['is_active'] ?? null) == 1) {
                 $this->session->setFlashdata('message_dashboard', '<div class="alert alert-info" role="alert">Selamat datang! Mohon lengkapi profil perusahaan Anda di menu "Edit Profile & Perusahaan" untuk dapat menggunakan semua fitur.</div>');
             }
         }
 
-        echo view('templates/header', $data);
-        echo view('templates/sidebar', $data);
-        echo view('templates/topbar', $data);
-        echo view('user/dashboard', $data);
-        echo view('templates/footer', $data);
+        return view('user/dashboard', $data);
     }
 
     public function edit()
@@ -234,7 +222,6 @@ class User extends BaseController // Meng-extend BaseController
         ];
 
         if ($is_activating) {
-            // Hanya tambahkan rules ini jika form aktivasi dan ada inputnya
             if ($this->request->getPost('initial_skep_no') || $this->request->getPost('initial_skep_tgl') || $this->request->getPost('initial_nama_barang') || $this->request->getPost('initial_kuota_jumlah')) {
                 $rules['initial_skep_no'] = 'trim|required|max_length[100]';
                 $rules['initial_skep_tgl'] = 'trim|required';
@@ -243,7 +230,7 @@ class User extends BaseController // Meng-extend BaseController
             }
         }
 
-        // Aturan validasi upload file (menggunakan CI4 built-in rules)
+        // Aturan validasi upload file
         if ($this->request->getFile('ttd')->isValid()) {
             $rules['ttd'] = [
                 'label' => 'Tanda Tangan PIC',
@@ -254,14 +241,13 @@ class User extends BaseController // Meng-extend BaseController
                     'ext_in' => 'Tipe file {field} tidak diizinkan (Hanya JPG, PNG, PDF).'
                 ]
             ];
-        } else if ($is_activating) { // Wajib diupload saat aktivasi, jika tidak ada file, tambahkan rule uploaded
+        } else if ($is_activating) {
              $rules['ttd'] = [
                 'label' => 'Tanda Tangan PIC',
                 'rules' => 'uploaded[ttd]',
                 'errors' => ['uploaded' => '{field} wajib diupload saat aktivasi akun.']
             ];
         }
-
 
         if ($this->request->getFile('profile_image')->isValid()) {
             $rules['profile_image'] = [
@@ -296,12 +282,8 @@ class User extends BaseController // Meng-extend BaseController
         }
 
         if (!$this->validate($rules)) {
-            $data['upload_error'] = $this->session->getFlashdata('upload_error_detail'); // Ambil flashdata error upload
-            echo view('templates/header', $data);
-            echo view('templates/sidebar', $data);
-            echo view('templates/topbar', $data);
-            echo view('user/edit-profile', $data);
-            echo view('templates/footer', $data);
+            $data['upload_error'] = $this->session->getFlashdata('upload_error_detail');
+            return view('user/edit-profile', $data);
         } else {
             // Handle TTD upload
             $nama_file_ttd = $this->_handle_file_upload('ttd', [
@@ -344,7 +326,6 @@ class User extends BaseController // Meng-extend BaseController
                 if ($nama_file_initial_skep === false) { return redirect()->to(base_url('user/edit')); }
             }
 
-
             // Update user table for profile image
             $data_user_update = [];
             if ($nama_file_profile_image !== null && $nama_file_profile_image != $data['user']['image']) {
@@ -381,7 +362,6 @@ class User extends BaseController // Meng-extend BaseController
                 $initial_kuota_jumlah = (float)$this->request->getPost('initial_kuota_jumlah');
                 $initial_skep_tgl = $this->request->getPost('initial_skep_tgl');
 
-
                 if (!empty($initial_skep_no) && !empty($initial_nama_barang) && $initial_kuota_jumlah > 0) {
                     $data_kuota_awal_barang = [
                         'id_pers' => $id_user_login,
@@ -408,11 +388,9 @@ class User extends BaseController // Meng-extend BaseController
             } else {
                 $this->db->table('user_perusahaan')->where('id_pers', $id_user_login)->update($data_perusahaan);
 
-                // Check for changes (simplified, as files handled separately)
                 $perubahan_terdeteksi = false;
                 if (!empty($data_user_update)) $perubahan_terdeteksi = true;
 
-                // Compare main data_perusahaan fields with existing
                 foreach ($data_perusahaan as $key => $value) {
                     if (($data['user_perusahaan'][$key] ?? null) !== $value) {
                         $perubahan_terdeteksi = true;
@@ -430,36 +408,6 @@ class User extends BaseController // Meng-extend BaseController
         }
     }
 
-    // Helper untuk konfigurasi upload (pindahkan ke BaseController jika sering digunakan)
-    private function _get_upload_config($upload_path, $allowed_types, $max_size_kb, $max_width = null, $max_height = null)
-    {
-        $full_upload_path = FCPATH . $upload_path;
-        if (!is_dir($full_upload_path)) {
-            if (!@mkdir($full_upload_path, 0777, true)) {
-                log_message('error', 'Gagal membuat direktori upload: ' . $full_upload_path);
-                return false;
-            }
-        }
-        if (!is_writable($full_upload_path)) {
-            log_message('error', 'Direktori upload tidak writable: ' . $full_upload_path);
-            return false;
-        }
-
-        // CI4 doesn't use this config array directly for its internal upload mechanism.
-        // It's more for logical reference if you're manually processing.
-        // The rules array in $this->validate() handles most of this.
-        $config = [
-            'upload_path'   => $full_upload_path,
-            'allowed_types' => $allowed_types,
-            'max_size'      => $max_size_kb,
-            // 'max_width'     => $max_width, // Not used directly in CI4 File upload rules this way
-            // 'max_height'    => $max_height, // Not used directly in CI4 File upload rules this way
-            'encrypt_name'  => true,
-        ];
-        return $config;
-    }
-
-    // Mengganti _get_upload_config dengan metode umum untuk penanganan upload
     private function _handle_file_upload($fieldName, array $uploadConfig, $existingFile = null)
     {
         $file = $this->request->getFile($fieldName);
@@ -493,7 +441,7 @@ class User extends BaseController // Meng-extend BaseController
                 return false;
             }
         }
-        return $existingFile; // Return existing file name if no new file uploaded
+        return $existingFile;
     }
 
     public function permohonan_impor_kembali()
@@ -505,7 +453,7 @@ class User extends BaseController // Meng-extend BaseController
 
         $data['user_perusahaan'] = $this->db->table('user_perusahaan')->where('id_pers', $id_user_login)->get()->getRowArray();
 
-        if (empty($data['user_perusahaan']) || ($data['user']['is_active'] ?? null) == 0) { // Menggunakan null coalescing
+        if (empty($data['user_perusahaan']) || ($data['user']['is_active'] ?? null) == 0) {
              $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Mohon lengkapi profil perusahaan Anda dan pastikan akun aktif sebelum membuat permohonan.</div>');
              return redirect()->to(base_url('user/edit'));
         }
@@ -519,7 +467,7 @@ class User extends BaseController // Meng-extend BaseController
         $data['list_barang_berkuota'] = $builder->get()->getResultArray();
 
         log_message('debug', 'PERMOHONAN BARU - ID User: ' . $id_user_login . ', Data User Perusahaan: ' . print_r($data['user_perusahaan'], true));
-        log_message('debug', 'PERMOHONAN BARU - Query List Barang Berkuota: ' . $this->db->getLastQuery()->getQueryString());
+        log_message('debug', 'PERMOHONAN BARU - Query List Barang Berkuota: ' . $this->db->getLastQuery());
         log_message('debug', 'PERMOHONAN BARU - Data List Barang Berkuota: ' . print_r($data['list_barang_berkuota'], true));
 
         $rules = [
@@ -548,14 +496,10 @@ class User extends BaseController // Meng-extend BaseController
 
         if (!$this->validate($rules)) {
             log_message('debug', 'PERMOHONAN BARU - Validasi form GAGAL. Errors: ' . json_encode($this->validator->getErrors()));
-            if (empty($data['list_barang_berkuota']) && $this->request->getMethod() !== 'post') { // Menggunakan getMethod()
+            if (empty($data['list_barang_berkuota']) && $this->request->getMethod() !== 'post') {
                  $this->session->setFlashdata('message_form_permohonan', '<div class="alert alert-warning" role="alert">Anda tidak memiliki kuota aktif untuk barang apapun saat ini. Tidak dapat membuat permohonan impor kembali. Silakan ajukan kuota terlebih dahulu.</div>');
             }
-            echo view('templates/header', $data);
-            echo view('templates/sidebar', $data);
-            echo view('templates/topbar', $data);
-            echo view('user/permohonan_impor_kembali_form', $data);
-            echo view('templates/footer', $data);
+            return view('user/permohonan_impor_kembali_form', $data);
         } else {
             log_message('debug', 'PERMOHONAN BARU - Validasi form SUKSES. Memulai proses data.');
             $id_kuota_barang_dipilih = (int)$this->request->getPost('id_kuota_barang_selected');
@@ -575,12 +519,12 @@ class User extends BaseController // Meng-extend BaseController
                 $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Kuota barang yang dipilih tidak valid atau tidak aktif. Silakan pilih kembali.</div>');
                 return redirect()->to(base_url('user/permohonan_impor_kembali'));
             }
-            if (($kuota_valid_db['nama_barang'] ?? '') != $nama_barang_input_form) { // Menggunakan null coalescing
+            if (($kuota_valid_db['nama_barang'] ?? '') != $nama_barang_input_form) {
                 log_message('error', 'PERMOHONAN BARU - Nama barang form ('.$nama_barang_input_form.') != nama barang DB ('.$kuota_valid_db['nama_barang'].') untuk ID kuota: '.$id_kuota_barang_dipilih);
                 $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Terjadi ketidaksesuaian data barang. Silakan coba lagi.</div>');
                 return redirect()->to(base_url('user/permohonan_impor_kembali'));
             }
-            if ($jumlah_barang_dimohon > (float)($kuota_valid_db['remaining_quota_barang'] ?? 0)) { // Menggunakan null coalescing
+            if ($jumlah_barang_dimohon > (float)($kuota_valid_db['remaining_quota_barang'] ?? 0)) {
                 log_message('error', 'PERMOHONAN BARU - Jumlah dimohon ('.$jumlah_barang_dimohon.') > sisa kuota ('.$kuota_valid_db['remaining_quota_barang'].') barang: '.$nama_barang_input_form);
                 $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Jumlah barang (' . $jumlah_barang_dimohon . ') melebihi sisa kuota (' . (float)($kuota_valid_db['remaining_quota_barang'] ?? 0) . ') untuk ' . htmlspecialchars($nama_barang_input_form) . '.</div>');
                 return redirect()->to(base_url('user/permohonan_impor_kembali'));
@@ -600,11 +544,10 @@ class User extends BaseController // Meng-extend BaseController
 
             $uploadedBCFile = $this->_handle_file_upload('file_bc_manifest', $uploadConfigBC);
             if ($uploadedBCFile === false) {
-                 return redirect()->to(base_url('user/permohonan_impor_kembali')); // Error sudah diset di _handle_file_upload
+                 return redirect()->to(base_url('user/permohonan_impor_kembali'));
             }
             $nama_file_bc_manifest = $uploadedBCFile;
             log_message('info', 'PERMOHONAN BARU - UPLOAD BC MANIFEST SUKSES: ' . ($nama_file_bc_manifest ?? 'NULL'));
-
 
             log_message('debug', 'PERMOHONAN BARU - Nilai $nama_file_bc_manifest sebelum insert: ' . ($nama_file_bc_manifest ?? 'NULL (INI MASALAH JIKA FILE DIUPLOAD)'));
 
@@ -642,7 +585,6 @@ class User extends BaseController // Meng-extend BaseController
                 log_message('error', 'PERMOHONAN BARU - GAGAL insert ke database. Error: ' . $e->getMessage() . ' Data: ' . print_r($data_insert, true));
                 $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal menyimpan permohonan ke database. Error: ' . $e->getMessage() . '</div>');
 
-                // Reload data for form if submission fails
                 $builder = $this->db->table('user_kuota_barang');
                 $builder->select('id_kuota_barang, nama_barang, remaining_quota_barang, nomor_skep_asal, tanggal_skep_asal');
                 $builder->where('id_pers', $id_user_login);
@@ -651,12 +593,7 @@ class User extends BaseController // Meng-extend BaseController
                 $builder->orderBy('nama_barang ASC, tanggal_skep_asal DESC');
                 $data['list_barang_berkuota'] = $builder->get()->getResultArray();
 
-                echo view('templates/header', $data);
-                echo view('templates/sidebar', $data);
-                echo view('templates/topbar', $data);
-                echo view('user/permohonan_impor_kembali_form', $data);
-                echo view('templates/footer', $data);
-                return;
+                return view('user/permohonan_impor_kembali_form', $data);
             }
         }
     }
@@ -674,7 +611,7 @@ class User extends BaseController // Meng-extend BaseController
             $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Mohon lengkapi profil perusahaan Anda terlebih dahulu di menu "Edit Profil & Perusahaan" sebelum mengajukan kuota.</div>');
             return redirect()->to(base_url('user/edit'));
         }
-        if (($data['user']['is_active'] ?? null) == 0) { // Menggunakan null coalescing
+        if (($data['user']['is_active'] ?? null) == 0) {
             $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Akun Anda belum aktif. Tidak dapat mengajukan kuota. Mohon lengkapi profil perusahaan Anda jika belum, atau hubungi Administrator.</div>');
             return redirect()->to(base_url('user/edit'));
         }
@@ -696,7 +633,6 @@ class User extends BaseController // Meng-extend BaseController
             'reason' => 'trim|required',
         ];
 
-        // Validasi untuk file lampiran
         if ($this->request->getFile('file_lampiran_pengajuan')->isValid()) {
             $rules['file_lampiran_pengajuan'] = [
                 'label' => 'File Lampiran Pengajuan',
@@ -708,13 +644,8 @@ class User extends BaseController // Meng-extend BaseController
             ];
         }
 
-
         if (!$this->validate($rules)) {
-            echo view('templates/header', $data);
-            echo view('templates/sidebar', $data);
-            echo view('templates/topbar', $data);
-            echo view('user/pengajuan_kuota_form', $data);
-            echo view('templates/footer');
+            return view('user/pengajuan_kuota_form', $data);
         } else {
             $nama_file_lampiran = null;
             $upload_dir_lampiran = FCPATH . 'uploads/lampiran_kuota/';
@@ -730,7 +661,6 @@ class User extends BaseController // Meng-extend BaseController
                 return redirect()->to(base_url('user/pengajuan_kuota'));
             }
             $nama_file_lampiran = $uploadedLampiran;
-
 
             $data_pengajuan = [
                 'id_pers'                   => $id_user_login,
@@ -769,21 +699,17 @@ class User extends BaseController // Meng-extend BaseController
         $data['daftar_pengajuan'] = $builder->get()->getResultArray();
 
         log_message('debug', 'USER DAFTAR PENGAJUAN KUOTA - User ID: ' . $id_user_login);
-        log_message('debug', 'USER DAFTAR PENGAJUAN KUOTA - Query: ' . $this->db->getLastQuery()->getQueryString());
+        log_message('debug', 'USER DAFTAR PENGAJUAN KUOTA - Query: ' . $this->db->getLastQuery());
         log_message('debug', 'USER DAFTAR PENGAJUAN KUOTA - Jumlah Data: ' . count($data['daftar_pengajuan']));
 
-        echo view('templates/header', $data);
-        echo view('templates/sidebar', $data);
-        echo view('templates/topbar', $data);
-        echo view('user/daftar_pengajuan_kuota_view', $data);
-        echo view('templates/footer', $data);
+        return view('user/daftar_pengajuan_kuota_view', $data);
     }
 
     public function print_bukti_pengajuan_kuota($id_pengajuan = 0)
     {
         if ($id_pengajuan == 0 || !is_numeric($id_pengajuan)) {
             $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">ID Pengajuan Kuota tidak valid.</div>');
-            return redirect()->to(base_url('user/daftar_pengajuan_kuota')); // Mengubah redirect
+            return redirect()->to(base_url('user/daftar_pengajuan_kuota'));
         }
         $user_login = $this->db->table('user')->where('email', $this->session->get('email'))->get()->getRowArray();
         if (!$user_login) {
@@ -800,7 +726,7 @@ class User extends BaseController // Meng-extend BaseController
 
         if (!$pengajuan) {
             $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Data pengajuan kuota tidak ditemukan atau Anda tidak berhak mengaksesnya.</div>');
-            return redirect()->to(base_url('user/daftar_pengajuan_kuota')); // Mengubah redirect
+            return redirect()->to(base_url('user/daftar_pengajuan_kuota'));
         }
         $data['pengajuan'] = $pengajuan;
         $data['user_perusahaan'] = [
@@ -817,7 +743,7 @@ class User extends BaseController // Meng-extend BaseController
         log_message('debug', 'PRINT PENGAJUAN KUOTA - Data Pengajuan: ' . print_r($data['pengajuan'], true));
         log_message('debug', 'PRINT PENGAJUAN KUOTA - Data User Perusahaan (untuk view): ' . print_r($data['user_perusahaan'], true));
 
-        echo view('user/FormPengajuanKuota_print', $data);
+        return view('user/FormPengajuanKuota_print', $data);
     }
 
     public function daftarPermohonan()
@@ -838,11 +764,8 @@ class User extends BaseController // Meng-extend BaseController
         $builder->where('up.id_pers', $data['user']['id']);
         $builder->orderBy('up.time_stamp', 'DESC');
         $data['permohonan'] = $builder->get()->getResultArray();
-        echo view('templates/header', $data);
-        echo view('templates/sidebar', $data);
-        echo view('templates/topbar', $data);
-        echo view('user/daftar-permohonan', $data);
-        echo view('templates/footer');
+        
+        return view('user/daftar-permohonan', $data);
     }
 
     public function detailPermohonan($id_permohonan = 0)
@@ -875,11 +798,7 @@ class User extends BaseController // Meng-extend BaseController
         }
         $data['lhp_detail'] = $this->db->table('lhp')->where('id_permohonan', $id_permohonan)->get()->getRowArray();
 
-        echo view('templates/header', $data);
-        echo view('templates/sidebar', $data);
-        echo view('templates/topbar', $data);
-        echo view('user/detail_permohonan_view', $data);
-        echo view('templates/footer');
+        return view('user/detail_permohonan_view', $data);
     }
 
     public function printPdf($id_permohonan)
@@ -923,7 +842,7 @@ class User extends BaseController // Meng-extend BaseController
         log_message('debug', 'PRINT PDF PERMOHONAN - Data Permohonan Lengkap (termasuk NoSkep dari permohonan): ' . print_r($data['permohonan'], true));
         log_message('debug', 'PRINT PDF PERMOHONAN - Data User Perusahaan (untuk kop/ttd): ' . print_r($data['user_perusahaan'], true));
 
-        echo view('user/FormPermohonan', $data);
+        return view('user/FormPermohonan', $data);
     }
 
     public function editpermohonan($id_permohonan = 0)
@@ -945,7 +864,7 @@ class User extends BaseController // Meng-extend BaseController
              return redirect()->to(base_url('user/daftarPermohonan'));
         }
 
-        if (($permohonan['status'] ?? null) != '0') { // Menggunakan null coalescing
+        if (($permohonan['status'] ?? null) != '0') {
             $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Permohonan ini sudah diproses (Status: '.htmlspecialchars($permohonan['status']).') dan tidak dapat diedit lagi.</div>');
             return redirect()->to(base_url('user/daftarPermohonan'));
         }
@@ -983,7 +902,6 @@ class User extends BaseController // Meng-extend BaseController
             'lokasi' => 'trim|required|max_length[100]',
         ];
 
-        // Validasi untuk file BC Manifest (opsional, jika ada upload baru)
         if ($this->request->getFile('file_bc_manifest_edit')->isValid()) {
             $rules['file_bc_manifest_edit'] = [
                 'label' => 'File BC 1.1 / Manifest (Baru)',
@@ -995,14 +913,9 @@ class User extends BaseController // Meng-extend BaseController
             ];
         }
 
-
         if (!$this->validate($rules)) {
             $data['id_permohonan_form_action'] = $id_permohonan;
-            echo view('templates/header', $data);
-            echo view('templates/sidebar', $data);
-            echo view('templates/topbar', $data);
-            echo view('user/edit_permohonan_form', $data);
-            echo view('templates/footer');
+            return view('user/edit_permohonan_form', $data);
         } else {
             $id_kuota_barang_dipilih = (int)$this->request->getPost('id_kuota_barang_selected');
             $nama_barang_input_form = $this->request->getPost('NamaBarang');
@@ -1018,14 +931,14 @@ class User extends BaseController // Meng-extend BaseController
                 $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Kuota barang yang dipilih tidak valid atau tidak aktif.</div>');
                 return redirect()->to(base_url('user/editpermohonan/' . $id_permohonan));
             }
-            if (($kuota_valid_db['nama_barang'] ?? '') != $nama_barang_input_form) { // Menggunakan null coalescing
+            if (($kuota_valid_db['nama_barang'] ?? '') != $nama_barang_input_form) {
                 $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Terjadi ketidaksesuaian data barang. Silakan coba lagi.</div>');
                 return redirect()->to(base_url('user/editpermohonan/' . $id_permohonan));
             }
 
-            $sisa_kuota_efektif_untuk_validasi = (float)($kuota_valid_db['remaining_quota_barang'] ?? 0); // Menggunakan null coalescing
-            if (($permohonan['id_kuota_barang_digunakan'] ?? null) == $id_kuota_barang_dipilih) { // Menggunakan null coalescing
-                $sisa_kuota_efektif_untuk_validasi += (float)($permohonan['JumlahBarang'] ?? 0); // Menggunakan null coalescing
+            $sisa_kuota_efektif_untuk_validasi = (float)($kuota_valid_db['remaining_quota_barang'] ?? 0);
+            if (($permohonan['id_kuota_barang_digunakan'] ?? null) == $id_kuota_barang_dipilih) {
+                $sisa_kuota_efektif_untuk_validasi += (float)($permohonan['JumlahBarang'] ?? 0);
             }
 
             if ($jumlah_barang_dimohon > $sisa_kuota_efektif_untuk_validasi) {
@@ -1046,12 +959,7 @@ class User extends BaseController // Meng-extend BaseController
             if ($this->request->getFile('file_bc_manifest_edit')->isValid()) {
                 $uploadedBCFile = $this->_handle_file_upload('file_bc_manifest_edit', $uploadConfigBC, $nama_file_bc_manifest_update);
                 if ($uploadedBCFile === false) {
-                    echo view('templates/header', $data);
-                    echo view('templates/sidebar', $data);
-                    echo view('templates/topbar', $data);
-                    echo view('user/edit_permohonan_form', $data);
-                    echo view('templates/footer');
-                    return;
+                    return view('user/edit_permohonan_form', $data);
                 }
                 $nama_file_bc_manifest_update = $uploadedBCFile;
             }
@@ -1071,7 +979,7 @@ class User extends BaseController // Meng-extend BaseController
                 'TglBongkar'    => $this->request->getPost('TglBongkar'),
                 'lokasi'        => $this->request->getPost('lokasi'),
                 'time_stamp_update' => date('Y-m-d H:i:s'),
-                'file_bc_manifest' => $nama_file_bc_manifest_update, // Pastikan ini diupdate
+                'file_bc_manifest' => $nama_file_bc_manifest_update,
             ];
 
             $this->db->table('user_permohonan')->where('id', $id_permohonan)->where('id_pers', $id_user_login)->update($data_update);
@@ -1101,11 +1009,7 @@ class User extends BaseController // Meng-extend BaseController
         ];
 
         if (!$this->validate($rules)) {
-            echo view('templates/header', $data);
-            echo view('templates/sidebar', $data);
-            echo view('templates/topbar', $data);
-            echo view('user/form_force_change_password', $data);
-            echo view('templates/footer');
+            return view('user/form_force_change_password', $data);
         } else {
             $new_password_hash = password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT);
             $update_data = [
@@ -1130,15 +1034,8 @@ class User extends BaseController // Meng-extend BaseController
             $data['user'] = ['name' => 'Guest', 'image' => 'default.jpg', 'role_id' => 0, 'role_name' => 'Guest'];
         }
 
-        log_message('debug', 'TES LAYOUT - Memulai load view header.');
-        echo view('templates/header', $data);
-
-        log_message('debug', 'TES LAYOUT - Memulai load view tes_konten.');
-        echo view('user/tes_konten', $data);
-
-        log_message('debug', 'TES LAYOUT - Memulai load view footer.');
-        echo view('templates/footer', $data);
-        log_message('debug', 'TES LAYOUT - Semua view selesai di-load.');
+        log_message('debug', 'TES LAYOUT - Load view tes_konten.');
+        return view('user/tes_konten', $data);
     }
 
     public function hapus_permohonan_impor($id_permohonan = 0)
@@ -1148,7 +1045,7 @@ class User extends BaseController // Meng-extend BaseController
             return redirect()->to(base_url('user/daftarPermohonan'));
         }
 
-        $id_user_login = $this->session->get('user_id'); // Menggunakan 'user_id' dari session
+        $id_user_login = $this->session->get('user_id');
 
         $permohonan = $this->db->table('user_permohonan')->where([
             'id' => $id_permohonan,
@@ -1161,12 +1058,12 @@ class User extends BaseController // Meng-extend BaseController
         }
 
         $deletable_statuses = ['0', '5'];
-        if (!in_array(($permohonan['status'] ?? null), $deletable_statuses)) { // Menggunakan null coalescing
+        if (!in_array(($permohonan['status'] ?? null), $deletable_statuses)) {
             $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Permohonan ini sudah dalam proses dan tidak dapat dihapus lagi.</div>');
             return redirect()->to(base_url('user/daftarPermohonan'));
         }
 
-        $file_bc_manifest_path = FCPATH . 'uploads/bc_manifest/' . ($permohonan['file_bc_manifest'] ?? ''); // Menggunakan null coalescing
+        $file_bc_manifest_path = FCPATH . 'uploads/bc_manifest/' . ($permohonan['file_bc_manifest'] ?? '');
         if (!empty($permohonan['file_bc_manifest']) && file_exists($file_bc_manifest_path)) {
             if (@unlink($file_bc_manifest_path)) {
                 log_message('info', 'User (ID: '.$id_user_login.') menghapus file BC Manifest: ' . $permohonan['file_bc_manifest'] . ' untuk permohonan ID: ' . $id_permohonan);
@@ -1188,7 +1085,7 @@ class User extends BaseController // Meng-extend BaseController
             return redirect()->to(base_url('user/daftar_pengajuan_kuota'));
         }
 
-        $id_user_login = $this->session->get('user_id'); // Menggunakan 'user_id' dari session
+        $id_user_login = $this->session->get('user_id');
 
         $pengajuan = $this->db->table('user_pengajuan_kuota')->where([
             'id' => $id_pengajuan,
@@ -1201,12 +1098,12 @@ class User extends BaseController // Meng-extend BaseController
         }
 
         $deletable_statuses = ['pending'];
-        if (!in_array(($pengajuan['status'] ?? null), $deletable_statuses)) { // Menggunakan null coalescing
+        if (!in_array(($pengajuan['status'] ?? null), $deletable_statuses)) {
             $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Pengajuan kuota ini sudah dalam proses (Status: '.htmlspecialchars($pengajuan['status']).') dan tidak dapat dihapus lagi.</div>');
             return redirect()->to(base_url('user/daftar_pengajuan_kuota'));
         }
 
-        $file_lampiran_path = FCPATH . 'uploads/lampiran_kuota/' . ($pengajuan['file_lampiran_user'] ?? ''); // Menggunakan null coalescing
+        $file_lampiran_path = FCPATH . 'uploads/lampiran_kuota/' . ($pengajuan['file_lampiran_user'] ?? '');
         if (!empty($pengajuan['file_lampiran_user']) && file_exists($file_lampiran_path)) {
             if (@unlink($file_lampiran_path)) {
                 log_message('info', 'User (ID: '.$id_user_login.') menghapus file lampiran kuota: ' . $pengajuan['file_lampiran_user'] . ' untuk pengajuan ID: ' . $id_pengajuan);

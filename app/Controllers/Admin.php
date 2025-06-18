@@ -246,73 +246,213 @@ class Admin extends BaseController
 
     public function tambah_user($role_id_to_add = 0)
     {
+        log_message('debug', '=== TAMBAH USER START ===');
+        log_message('debug', 'Role ID: ' . $role_id_to_add);
+        log_message('debug', 'Method: ' . $this->request->getMethod());
+        
         $target_role_info = $this->db->table('user_role')->where('id', $role_id_to_add)->get()->getRowArray();
         if (!$target_role_info || $role_id_to_add == 1) {
+            log_message('error', 'Invalid role_id: ' . $role_id_to_add);
             session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Role target tidak valid atau tidak diizinkan.</div>');
             return redirect()->to('admin/manajemen_user');
         }
 
+        // Setup login identifier rules
+        $login_identifier_label = 'Login Identifier';
+        $login_identifier_rules = 'required|trim|is_unique[user.email]';
+        $login_identifier_placeholder = 'Masukkan Email atau NIP';
+        $login_identifier_help_text = 'Digunakan untuk login.';
+        
+        if ($role_id_to_add == 2) { 
+            $login_identifier_label = 'Email';
+            $login_identifier_rules .= '|valid_email';
+            $login_identifier_placeholder = 'Contoh: user@example.com';
+        } elseif (in_array($role_id_to_add, [3, 4, 5])) { 
+            $login_identifier_label = 'NIP';
+            $login_identifier_rules .= '|numeric';
+            $login_identifier_placeholder = 'Masukkan NIP';
+            $login_identifier_help_text = 'NIP akan digunakan untuk login.';
+        }
+
+        // POST processing
+        if ($this->request->getMethod() === 'POST') {
+            log_message('debug', '=== POST REQUEST PROCESSING ===');
+            
+            // CHECK FORM TOKEN untuk prevent double submission
+            $submitted_token = $this->request->getPost('form_token');
+            $last_processed_token = session()->get('last_processed_token');
+            
+            if ($submitted_token && $last_processed_token === $submitted_token) {
+                log_message('debug', 'Duplicate submission detected - redirecting');
+                // Jangan set flash message lagi, langsung redirect
+                return redirect()->to('admin/manajemen_user');
+            }
+            
+            $postData = $this->request->getPost();
+            log_message('debug', 'POST data: ' . json_encode($postData));
+
+            // Validation rules
+            $rules = [
+                'name' => [
+                    'label' => 'Nama Lengkap',
+                    'rules' => 'required|trim',
+                    'errors' => ['required' => '{field} wajib diisi.']
+                ],
+                'login_identifier' => [
+                    'label' => $login_identifier_label,
+                    'rules' => $login_identifier_rules,
+                    'errors' => [
+                        'required' => '{field} wajib diisi.',
+                        'is_unique' => '{field} ini sudah terdaftar.',
+                        'numeric' => '{field} harus berupa angka.',
+                        'valid_email' => '{field} tidak valid.'
+                    ]
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'rules' => 'required|trim|min_length[6]',
+                    'errors' => [
+                        'required' => '{field} wajib diisi.',
+                        'min_length' => '{field} minimal 6 karakter.'
+                    ]
+                ],
+                'confirm_password' => [
+                    'label' => 'Konfirmasi Password',
+                    'rules' => 'required|trim|matches[password]',
+                    'errors' => [
+                        'required' => '{field} wajib diisi.',
+                        'matches' => '{field} tidak cocok dengan password.'
+                    ]
+                ]
+            ];
+
+            if ($role_id_to_add == 3) {
+                $rules['jabatan_petugas'] = [
+                    'label' => 'Jabatan Petugas',
+                    'rules' => 'trim|required',
+                    'errors' => ['required' => '{field} wajib diisi.']
+                ];
+            }
+            
+            if ($this->validate($rules)) {
+                log_message('debug', '=== VALIDATION PASSED ===');
+                
+                try {
+                    // MARK TOKEN as PROCESSED
+                    session()->set('last_processed_token', $submitted_token);
+                    
+                    log_message('debug', '=== STARTING DATABASE TRANSACTION ===');
+                    $this->db->transStart();
+                    
+                    $force_change_pass = in_array($role_id_to_add, [4, 5]) ? 0 : 1;
+                    
+                    $user_data_to_insert = [
+                        'name' => htmlspecialchars($this->request->getPost('name'), ENT_QUOTES, 'UTF-8'),
+                        'email' => htmlspecialchars($this->request->getPost('login_identifier'), ENT_QUOTES, 'UTF-8'),
+                        'image' => 'default.jpg',
+                        'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+                        'role_id' => $role_id_to_add, 
+                        'is_active' => 1, 
+                        'force_change_password' => $force_change_pass, 
+                        'date_created' => time()
+                    ];
+                    
+                    log_message('debug', '=== USER DATA TO INSERT ===');
+                    log_message('debug', json_encode($user_data_to_insert));
+                    
+                    // Check if user already exists (double-check)
+                    $existing_user = $this->db->table('user')
+                        ->where('email', $user_data_to_insert['email'])
+                        ->get()->getRowArray();
+                    
+                    if ($existing_user) {
+                        log_message('debug', 'User already exists, skipping insert');
+                        session()->setFlashdata('message', '<div class="alert alert-info" role="alert">User dengan email tersebut sudah ada.</div>');
+                        return redirect()->to('admin/manajemen_user');
+                    }
+                    
+                    // Insert user
+                    $insert_result = $this->db->table('user')->insert($user_data_to_insert);
+                    log_message('debug', 'Insert result: ' . ($insert_result ? 'SUCCESS' : 'FAILED'));
+                    
+                    if (!$insert_result) {
+                        $db_error = $this->db->error();
+                        log_message('error', 'Database insert error: ' . json_encode($db_error));
+                        throw new \Exception('Failed to insert user: ' . $db_error['message']);
+                    }
+                    
+                    $new_user_id = $this->db->insertID();
+                    log_message('debug', 'New user ID: ' . $new_user_id);
+
+                    // Insert data petugas jika role 3
+                    if ($new_user_id && $role_id_to_add == 3) {
+                        $petugas_data = [
+                            'id_user' => $new_user_id, 
+                            'Nama' => $user_data_to_insert['name'], 
+                            'NIP' => $user_data_to_insert['email'],
+                            'Jabatan' => htmlspecialchars($this->request->getPost('jabatan_petugas'), ENT_QUOTES, 'UTF-8')
+                        ];
+                        
+                        $petugas_insert = $this->db->table('petugas')->insert($petugas_data);
+                        if (!$petugas_insert) {
+                            $db_error = $this->db->error();
+                            throw new \Exception('Failed to insert petugas: ' . $db_error['message']);
+                        }
+                    }
+                    
+                    // Complete transaction
+                    $this->db->transComplete();
+                    
+                    if ($this->db->transStatus() === false) {
+                        throw new \Exception('Database transaction failed');
+                    }
+                    
+                    log_message('debug', '=== SUCCESS: USER CREATED ===');
+                    
+                    // ONLY SET FLASH MESSAGE ONCE
+                    session()->setFlashdata('message', '<div class="alert alert-success" role="alert">User baru "' . htmlspecialchars($user_data_to_insert['name']) . '" berhasil ditambahkan.</div>');
+                    
+                    log_message('debug', '=== REDIRECTING TO MANAJEMEN_USER ===');
+                    return redirect()->to('admin/manajemen_user');
+                    
+                } catch (\Exception $e) {
+                    $this->db->transRollback();
+                    log_message('error', '=== EXCEPTION OCCURRED ===');
+                    log_message('error', 'Exception: ' . $e->getMessage());
+                    
+                    session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error: ' . $e->getMessage() . '</div>');
+                    return redirect()->to('admin/manajemen_user');
+                }
+            } else {
+                log_message('debug', '=== VALIDATION FAILED ===');
+                $errors = $this->validator->getErrors();
+                log_message('debug', 'Validation errors: ' . json_encode($errors));
+                
+                session()->setFlashdata('errors', $errors);
+            }
+        }
+        
+        // Generate unique form token untuk GET request
+        $form_token = uniqid('form_', true);
+        
         $data = [
             'title' => 'Returnable Package',
             'subtitle' => 'Tambah User Baru: ' . htmlspecialchars($target_role_info['role']),
             'user' => $this->user,
             'target_role_info' => $target_role_info,
             'role_id_to_add' => $role_id_to_add,
-            'validation' => $this->validation,
+            'login_identifier_label_view' => $login_identifier_label,
+            'login_identifier_placeholder' => $login_identifier_placeholder,
+            'login_identifier_help_text' => $login_identifier_help_text,
+            'form_token' => $form_token
         ];
-
-        $rules = [
-            'name' => 'required|trim',
-            'password' => 'required|trim|min_length[6]|matches[confirm_password]',
-            'confirm_password' => 'required|trim|matches[password]'
-        ];
-
-        $login_identifier_label = 'Login Identifier';
-        $login_identifier_rules = 'required|trim|is_unique[user.email]';
-        if ($role_id_to_add == 2) { 
-            $login_identifier_label = 'Email';
-            $login_identifier_rules .= '|valid_email';
-        } elseif (in_array($role_id_to_add, [3, 4, 5])) { 
-            $login_identifier_label = 'NIP';
-            $login_identifier_rules .= '|numeric';
-        }
-        $rules['login_identifier'] = [
-            'label' => $login_identifier_label, 'rules' => $login_identifier_rules,
-            'errors' => [ 'is_unique' => '{field} ini sudah terdaftar.', 'numeric' => '{field} harus berupa angka.', 'valid_email'=> '{field} tidak valid.']
-        ];
-        $data['login_identifier_label_view'] = $login_identifier_label; 
-
-        if ($role_id_to_add == 3) {
-            $rules['jabatan_petugas'] = 'trim|required';
-        }
         
-        if ($this->request->getMethod() === 'post' && $this->validate($rules)) {
-            $force_change_pass = in_array($role_id_to_add, [4, 5]) ? 0 : 1;
-            
-            $user_data_to_insert = [
-                'name' => htmlspecialchars($this->request->getPost('name', true)),
-                'email' => htmlspecialchars($this->request->getPost('login_identifier', true)),
-                'image' => 'default.jpg',
-                'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-                'role_id' => $role_id_to_add, 'is_active' => 1, 'force_change_password' => $force_change_pass, 'date_created' => time()
-            ];
-            $this->db->table('user')->insert($user_data_to_insert);
-            $new_user_id = $this->db->insertID();
-
-            if ($new_user_id && $role_id_to_add == 3) {
-                $this->db->table('petugas')->insert([
-                    'id_user' => $new_user_id, 'Nama' => $user_data_to_insert['name'], 'NIP' => $user_data_to_insert['email'],
-                    'Jabatan' => htmlspecialchars($this->request->getPost('jabatan_petugas', true))
-                ]);
-            }
-            
-            session()->setFlashdata('message', '<div class="alert alert-success" role="alert">User baru berhasil ditambahkan.</div>');
-            return redirect()->to('admin/manajemen_user');
-        }
-        
+        log_message('debug', '=== RETURNING TO FORM VIEW ===');
         return view('admin/form_tambah_user_view', $data);
     }
-    
+
+
+
     public function delete_user($user_id = 0)
     {
         if ($user_id == 0 || !is_numeric($user_id) || $user_id == session()->get('user_id') || $user_id == 1) {

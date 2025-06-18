@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/main') ?> // Menggunakan layout 'main.php'
+<?= $this->extend('layouts/main') ?>
 <?= $this->section('title') ?>
     <?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Manajemen User'; ?>
 <?= $this->endSection() ?>
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <?php if (session()->getFlashdata('message')) { echo session()->getFlashdata('message'); } ?>
+    <!-- <?php if (session()->getFlashdata('message')) { echo session()->getFlashdata('message'); } ?> -->
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -76,7 +76,7 @@
 
                                 <?php // Allow deleting user if not the main admin (ID 1)
                                 if ($usr['id'] != 1) : ?>
-                                <a href="<?= site_url('admin/delete_user/' . $usr['id']); ?>" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus User" onclick="return confirm('Apakah Anda yakin ingin menghapus user <?= htmlspecialchars($usr['name']); ?>? Tindakan ini juga akan menghapus data terkait jika ada (misal data detail petugas).');">
+                                <a href="<?= site_url('admin/delete_user/' . $usr['id']); ?>" class="btn btn-danger btn-circle btn-sm my-1 btn-delete" title="Hapus User" data-name="<?= htmlspecialchars($usr['name']); ?>" data-url="<?= site_url('admin/delete_user/' . $usr['id']); ?>">
                                     <i class="fas fa-trash"></i>
                                 </a>
                                 <?php endif; ?>
@@ -91,17 +91,83 @@
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
+// Script dipindahkan ke sini agar dimuat setelah jQuery
 $(document).ready(function() {
-    if (typeof $.fn.DataTable !== 'undefined') {
+    console.log('ManajemenUser: jQuery ready, version:', $.fn.jquery);
+    
+    // Inisialisasi DataTable
+    if (typeof $.fn.DataTable !== 'undefined' && $('#dataTableManajemenUser').length) {
         $('#dataTableManajemenUser').DataTable({
             "order": [[1, "asc"]], // Urutkan berdasarkan Nama
             "columnDefs": [
-                { "orderable": false, "targets": [0, 6] } // Kolom # dan Action
-            ]
+                { "orderable": false, "targets": [0, 6] } // Kolom # dan Action tidak bisa diurutkan
+            ],
+            "pageLength": 10,
+            "responsive": true,
+            "language": {
+                "search": "Cari:",
+                "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "infoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
+                "infoFiltered": "(difilter dari _MAX_ total data)",
+                "paginate": {
+                    "first": "Pertama",
+                    "last": "Terakhir", 
+                    "next": "Selanjutnya",
+                    "previous": "Sebelumnya"
+                },
+                "emptyTable": "Tidak ada data yang tersedia"
+            }
         });
+        console.log('DataTable initialized successfully');
+    } else {
+        console.log('DataTable not available or table not found');
+    }
+    
+    // Handler untuk tombol delete dengan konfirmasi yang lebih baik
+    $('.btn-delete').on('click', function(e) {
+        e.preventDefault();
+        const userName = $(this).data('name');
+        const deleteUrl = $(this).data('url');
+        
+        if (confirm('Apakah Anda yakin ingin menghapus user "' + userName + '"?\n\nTindakan ini juga akan menghapus data terkait jika ada (misal data detail petugas).')) {
+            window.location.href = deleteUrl;
+        }
+    });
+    
+    // Handler untuk dropdown toggle jika ada masalah
+    $('.dropdown-toggle').on('click', function(e) {
+        console.log('Dropdown clicked');
+    });
+    
+    // Enhancement untuk tooltip jika diperlukan
+    if ($.fn.tooltip) {
+        $('[title]').tooltip();
     }
 });
+
+// Fallback jika jQuery tidak tersedia
+if (typeof $ === 'undefined') {
+    console.error('jQuery is not loaded in ManajemenUser page!');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Using vanilla JavaScript fallback for ManajemenUser');
+        
+        // Basic delete confirmation without jQuery
+        const deleteButtons = document.querySelectorAll('a[href*="delete_user"]');
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                const userName = this.getAttribute('title').replace('Hapus User', '').trim();
+                if (!confirm('Yakin ingin menghapus user ini?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+}
 </script>
 <?= $this->endSection() ?>

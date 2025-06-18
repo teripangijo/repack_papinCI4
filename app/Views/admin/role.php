@@ -1,13 +1,11 @@
 <?= $this->extend('layouts/main') ?> // Menggunakan layout 'main.php'
 <?= $this->section('title') ?>
-    <?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Proses Permohonan & LHP'; ?>
+    <?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Manajemen Role'; ?>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<!-- Begin Page Content -->
 <div class="container-fluid">
 
-    <!-- Page Heading -->
     <h1 class="h3 mb-4 text-gray-800"> <?= $subtitle; ?></h1>
 
     <div class="row">
@@ -50,12 +48,6 @@
     </div>
 
 </div>
-<!-- /.container-fluid -->
-
-</div>
-<!-- End of Main Content -->
-
-<!-- Modal -->
 <div class="modal fade" id="newRoleModal" tabindex="-1" role="dialog" aria-labelledby="newRoleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

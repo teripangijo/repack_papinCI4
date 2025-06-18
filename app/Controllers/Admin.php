@@ -1080,104 +1080,114 @@ class Admin extends BaseController
 
     public function proses_pengajuan_kuota($id_pengajuan)
     {
+        // 1. Pengambilan Data Awal
         $builder = $this->db->table('user_pengajuan_kuota upk');
-        $builder->select('upk.*, upr.NamaPers, upr.initial_quota as initial_quota_umum_sebelum, upr.remaining_quota as remaining_quota_umum_sebelum, u.email as user_email');
+        $builder->select('upk.*, upr.NamaPers, upr.initial_quota as initial_quota_sebelum, upr.remaining_quota as remaining_quota_sebelum, u.email as user_email');
         $builder->join('user_perusahaan upr', 'upk.id_pers = upr.id_pers', 'left');
         $builder->join('user u', 'upk.id_pers = u.id', 'left');
         $builder->where('upk.id', $id_pengajuan);
         $pengajuan = $builder->get()->getRowArray();
 
-        if (!$pengajuan || !in_array($pengajuan['status'], ['pending', 'diproses'])) {
-            session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Pengajuan kuota tidak ditemukan atau tidak dapat diproses.</div>');
+        // 2. Validasi Awal
+        if (!$pengajuan || !in_array($pengajuan['status'], ['pending', 'diproses', 'approved'])) {
+            $pesan_error = 'Pengajuan kuota tidak ditemukan atau statusnya tidak dapat diproses (Status saat ini: ' . ($pengajuan['status'] ?? 'N/A') . ').';
+            session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">' . $pesan_error . '</div>');
             return redirect()->to('admin/daftar_pengajuan_kuota');
         }
 
-        $data = [
-            'title' => 'Returnable Package',
-            'subtitle' => 'Proses Pengajuan Kuota',
-            'user' => $this->user,
-            'pengajuan' => $pengajuan,
-            'validation' => $this->validation,
-        ];
-
-        $rules = [
-            'status_pengajuan' => 'required|in_list[approved,rejected,diproses]',
-            'admin_notes' => 'trim'
-        ];
-
-        if ($this->request->getPost('status_pengajuan') == 'approved') {
-            $rules['approved_quota'] = 'trim|required|numeric|greater_than[0]';
-            $rules['nomor_sk_petugas'] = 'trim|required|max_length[100]';
-            $rules['tanggal_sk_petugas'] = 'trim|required';
-        }
-
-        if ($this->request->getMethod() === 'post' && $this->validate($rules)) {
-            $status = $this->request->getPost('status_pengajuan');
-            $approved_quota = $status == 'approved' ? (float)$this->request->getPost('approved_quota') : 0;
-            
-            $update_data = [
-                'status' => $status,
-                'admin_notes' => $this->request->getPost('admin_notes'),
-                'processed_date' => date('Y-m-d H:i:s'),
-                'nomor_sk_petugas' => $this->request->getPost('nomor_sk_petugas'),
-                'tanggal_sk_petugas' => $this->request->getPost('tanggal_sk_petugas'),
-                'approved_quota' => $approved_quota
+        // 3. Logika untuk menangani POST (jika form disubmit)
+        if ($this->request->getMethod() === 'post') {
+            dd($this->request->getPost());
+            // Definisikan aturan validasi dasar
+            $rules = [
+                'status_pengajuan' => 'required|in_list[approved,rejected,diproses]',
+                'admin_notes'      => 'trim'
             ];
 
-            $skFile = $this->request->getFile('file_sk_petugas');
-            if ($skFile && $skFile->isValid() && !$skFile->hasMoved()) {
-                $uploadPath = FCPATH . 'uploads/sk_kuota/';
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
-                }
+            // Tambahkan aturan jika status 'approved'
+            if ($this->request->getPost('status_pengajuan') == 'approved') {
+                $rules['approved_quota']     = 'trim|required|numeric|greater_than[0]';
+                $rules['nomor_sk_petugas']   = 'trim|required|max_length[100]';
+                $rules['tanggal_sk_petugas'] = 'trim|required|valid_date[Y-m-d]';
 
+                // Wajibkan upload file HANYA jika file sebelumnya tidak ada
+                if (empty($pengajuan['file_sk_petugas'])) {
+                    $rules['file_sk_petugas'] = 'uploaded[file_sk_petugas]|max_size[file_sk_petugas,2048]|ext_in[file_sk_petugas,pdf,jpg,png,jpeg]';
+                }
+            }
+            
+            // Wajibkan catatan jika ditolak
+            if ($this->request->getPost('status_pengajuan') == 'rejected') {
+                $rules['admin_notes'] = 'trim|required';
+            }
+
+            // Jalankan Validasi
+            if (!$this->validate($rules)) {
+                // Jika validasi gagal, kembali ke form dengan membawa error dan input lama
+                return redirect()->back()->withInput();
+            }
+
+            // --- JIKA VALIDASI SUKSES ---
+
+            // Ambil data dari form
+            $status         = $this->request->getPost('status_pengajuan');
+            $approved_quota = ($status == 'approved') ? (float)$this->request->getPost('approved_quota') : 0;
+
+            $update_data = [
+                'status'             => $status,
+                'admin_notes'        => $this->request->getPost('admin_notes'),
+                'processed_date'     => date('Y-m-d H:i:s'),
+                'nomor_sk_petugas'   => $this->request->getPost('nomor_sk_petugas'),
+                'tanggal_sk_petugas' => $this->request->getPost('tanggal_sk_petugas'),
+                'approved_quota'     => $approved_quota
+            ];
+
+            // Handle file upload jika ada file baru
+            $skFile = $this->request->getFile('file_sk_petugas');
+            if ($skFile->isValid() && !$skFile->hasMoved()) {
+                $uploadPath = FCPATH . 'uploads/sk_kuota/';
+                // Hapus file lama jika ada
                 if (!empty($pengajuan['file_sk_petugas']) && file_exists($uploadPath . $pengajuan['file_sk_petugas'])) {
                     @unlink($uploadPath . $pengajuan['file_sk_petugas']);
                 }
-
+                // Pindahkan file baru
                 $newName = $skFile->getRandomName();
                 $skFile->move($uploadPath, $newName);
                 $update_data['file_sk_petugas'] = $newName;
-            } else {
-                $update_data['file_sk_petugas'] = $pengajuan['file_sk_petugas'] ?? null;
             }
 
+            // Update tabel pengajuan
             $this->db->table('user_pengajuan_kuota')->where('id', $id_pengajuan)->update($update_data);
 
+            // Jika disetujui, proses penambahan kuota barang
             if ($status == 'approved' && $approved_quota > 0) {
                 $id_pers = $pengajuan['id_pers'];
                 $nama_barang = $pengajuan['nama_barang_kuota'];
 
+                // Hapus entri kuota lama dari pengajuan ini jika ada (untuk kasus re-approval)
+                $this->db->table('user_kuota_barang')->where('id_pengajuan_kuota', $id_pengajuan)->delete();
+
                 if ($id_pers && !empty($nama_barang)) {
                     $kuota_barang_data = [
-                        'id_pers' => $id_pers,
-                        'id_pengajuan_kuota' => $id_pengajuan,
-                        'nama_barang' => $nama_barang,
-                        'initial_quota_barang' => $approved_quota,
-                        'remaining_quota_barang' => $approved_quota,
-                        'nomor_skep_asal' => $this->request->getPost('nomor_sk_petugas'),
-                        'tanggal_skep_asal' => $this->request->getPost('tanggal_sk_petugas'),
-                        'status_kuota_barang' => 'active',
-                        'dicatat_oleh_user_id' => $this->user['id'],
-                        'waktu_pencatatan' => date('Y-m-d H:i:s')
+                        'id_pers'               => $id_pers,
+                        'id_pengajuan_kuota'    => $id_pengajuan,
+                        'nama_barang'           => $nama_barang,
+                        'initial_quota_barang'  => $approved_quota,
+                        'remaining_quota_barang'=> $approved_quota,
+                        'nomor_skep_asal'       => $update_data['nomor_sk_petugas'],
+                        'tanggal_skep_asal'     => $update_data['tanggal_sk_petugas'],
+                        'status_kuota_barang'   => 'active',
+                        'dicatat_oleh_user_id'  => $this->user['id'],
+                        'waktu_pencatatan'      => date('Y-m-d H:i:s')
                     ];
-
                     $this->db->table('user_kuota_barang')->insert($kuota_barang_data);
                     $id_kuota_barang_baru = $this->db->insertID();
 
                     if ($id_kuota_barang_baru) {
                         $this->_log_perubahan_kuota(
-                            $id_pers,
-                            'penambahan',
-                            $approved_quota,
-                            0,
-                            $approved_quota,
-                            'Persetujuan Pengajuan Kuota. Barang: ' . $nama_barang . '. No. SK: ' . ($this->request->getPost('nomor_sk_petugas') ?: '-'),
-                            $id_pengajuan,
-                            'pengajuan_kuota_disetujui',
-                            $this->user['id'],
-                            $nama_barang,
-                            $id_kuota_barang_baru
+                            $id_pers, 'penambahan', $approved_quota, 0, $approved_quota,
+                            'Persetujuan Pengajuan Kuota. Barang: ' . $nama_barang . '. No. SK: ' . ($update_data['nomor_sk_petugas'] ?: '-'),
+                            $id_pengajuan, 'pengajuan_kuota_disetujui', $this->user['id'], $nama_barang, $id_kuota_barang_baru
                         );
                     }
                 }
@@ -1186,6 +1196,15 @@ class Admin extends BaseController
             session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Pengajuan kuota telah berhasil diproses!</div>');
             return redirect()->to('admin/daftar_pengajuan_kuota');
         }
+
+        // 4. Logika untuk menampilkan GET (jika halaman diakses pertama kali atau setelah redirect)
+        $data = [
+            'title'      => 'Returnable Package',
+            'subtitle'   => 'Proses Pengajuan Kuota',
+            'user'       => $this->user,
+            'pengajuan'  => $pengajuan,
+            'validation' => $this->validation, // Ambil dari property class
+        ];
 
         return view('admin/proses_pengajuan_kuota_form', $data);
     }

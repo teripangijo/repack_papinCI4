@@ -1,10 +1,13 @@
-<?= $this->extend('layouts/main') ?> // Menggunakan layout 'main.php'
+<?= $this->extend('layouts/main') ?>
+
 <?= $this->section('title') ?>
-    <?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Daftar Permohonan Impor'; ?>
+    <?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Proses Pengajuan Kuota'; ?>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <?php
+// Ambil service validasi. Ini cara paling aman.
+$validation = \Config\Services::validation();
 $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchars($pengajuan['nama_barang_kuota']) : 'Tidak Diketahui';
 ?>
 
@@ -16,18 +19,17 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
         </a>
     </div>
 
-    <?php
-    $validation = \Config\Services::validation();
-    if ($validation->getErrors()) : ?>
-        <div class="alert alert-danger" role="alert">
-            <?php foreach ($validation->getErrors() as $error) : ?>
-                <p><?= $error ?></p>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
     <?php if (session()->getFlashdata('message')) : ?>
         <?= session()->getFlashdata('message'); ?>
     <?php endif; ?>
+
+    <?php if ($validation->getErrors()) : ?>
+        <div class="alert alert-danger" role="alert">
+            <h5 class="alert-heading">Terjadi Kesalahan Validasi!</h5>
+            Mohon periksa kembali data yang Anda masukkan pada form di bawah ini.
+        </div>
+    <?php endif; ?>
+
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -65,51 +67,46 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
                 </div>
             </div>
             <hr>
+
             <h5>Form Tindakan Admin</h5>
             <form action="<?= site_url('admin/proses_pengajuan_kuota/' . $pengajuan['id']); ?>" method="post" enctype="multipart/form-data">
-                <?= csrf_field(); // CSRF token for CI4 ?>
+                <?= csrf_field(); ?>
+                
                 <div class="form-group">
                     <label for="status_pengajuan">Status Pengajuan <span class="text-danger">*</span></label>
-                    <select class="form-control <?= $validation->hasError('status_pengajuan') ? 'is-invalid' : ''; ?>" id="status_pengajuan" name="status_pengajuan" required>
-                        <option value="pending" <?= old('status_pengajuan', ($pengajuan['status'] ?? 'pending')) == 'pending' ? 'selected' : ''; ?>>Pending</option>
-                        <option value="diproses" <?= old('status_pengajuan', ($pengajuan['status'] ?? '')) == 'diproses' ? 'selected' : ''; ?>>Diproses</option>
-                        <option value="approved" <?= old('status_pengajuan', ($pengajuan['status'] ?? '')) == 'approved' ? 'selected' : ''; ?>>Approved (Disetujui)</option>
-                        <option value="rejected" <?= old('status_pengajuan', ($pengajuan['status'] ?? '')) == 'rejected' ? 'selected' : ''; ?>>Rejected (Ditolak)</option>
+                    <select class="form-control <?= $validation->hasError('status_pengajuan') ? 'is-invalid' : '' ?>" id="status_pengajuan" name="status_pengajuan">
+                        <option value="pending" <?= old('status_pengajuan', $pengajuan['status']) == 'pending' ? 'selected' : '' ?>>Pending</option>
+                        <option value="diproses" <?= old('status_pengajuan', $pengajuan['status']) == 'diproses' ? 'selected' : '' ?>>Diproses</option>
+                        <option value="approved" <?= old('status_pengajuan', $pengajuan['status']) == 'approved' ? 'selected' : '' ?>>Approved (Disetujui)</option>
+                        <option value="rejected" <?= old('status_pengajuan', $pengajuan['status']) == 'rejected' ? 'selected' : '' ?>>Rejected (Ditolak)</option>
                     </select>
-                    <?php if ($validation->hasError('status_pengajuan')) : ?>
-                        <small class="text-danger pl-1"><?= $validation->getError('status_pengajuan'); ?></small>
-                    <?php endif; ?>
+                    <div class="invalid-feedback"><?= $validation->getError('status_pengajuan') ?></div>
                 </div>
 
-                <div id="approved_fields" style="<?= old('status_pengajuan', ($pengajuan['status'] ?? '')) == 'approved' ? 'display:block;' : 'display:none;'; ?>">
+                <div id="approved_fields" style="<?= old('status_pengajuan', $pengajuan['status']) == 'approved' ? 'display:block;' : 'display:none;'; ?>">
                     <div class="form-group">
                         <label for="approved_quota">Jumlah Kuota Disetujui untuk <span class="text-info font-weight-bold"><?= $nama_barang_diajukan; ?></span> <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control <?= $validation->hasError('approved_quota') ? 'is-invalid' : ''; ?>" id="approved_quota" name="approved_quota" value="<?= old('approved_quota', $pengajuan['approved_quota'] ?? ($pengajuan['requested_quota'] ?? '0')); ?>" min="0">
-                        <?php if ($validation->hasError('approved_quota')) : ?>
-                            <small class="text-danger pl-1"><?= $validation->getError('approved_quota'); ?></small>
-                        <?php endif; ?>
+                        <input type="number" class="form-control <?= $validation->hasError('approved_quota') ? 'is-invalid' : '' ?>" id="approved_quota" name="approved_quota" value="<?= old('approved_quota', $pengajuan['approved_quota'] ?? ($pengajuan['requested_quota'] ?? '0')); ?>" min="0">
+                        <div class="invalid-feedback"><?= $validation->getError('approved_quota') ?></div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="nomor_sk_petugas">Nomor Surat Keputusan (KEP) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control <?= $validation->hasError('nomor_sk_petugas') ? 'is-invalid' : ''; ?>" id="nomor_sk_petugas" name="nomor_sk_petugas" value="<?= old('nomor_sk_petugas', $pengajuan['nomor_sk_petugas'] ?? ''); ?>">
-                            <?php if ($validation->hasError('nomor_sk_petugas')) : ?>
-                                <small class="text-danger pl-1"><?= $validation->getError('nomor_sk_petugas'); ?></small>
-                            <?php endif; ?>
+                            <input type="text" class="form-control <?= $validation->hasError('nomor_sk_petugas') ? 'is-invalid' : '' ?>" id="nomor_sk_petugas" name="nomor_sk_petugas" value="<?= old('nomor_sk_petugas', $pengajuan['nomor_sk_petugas'] ?? ''); ?>">
+                            <div class="invalid-feedback"><?= $validation->getError('nomor_sk_petugas') ?></div>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="tanggal_sk_petugas">Tanggal Surat Keputusan (KEP) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control gj-datepicker <?= $validation->hasError('tanggal_sk_petugas') ? 'is-invalid' : ''; ?>" id="tanggal_sk_petugas" name="tanggal_sk_petugas" placeholder="YYYY-MM-DD" value="<?= old('tanggal_sk_petugas', (isset($pengajuan['tanggal_sk_petugas']) && $pengajuan['tanggal_sk_petugas'] != '0000-00-00') ? $pengajuan['tanggal_sk_petugas'] : ''); ?>">
-                            <?php if ($validation->hasError('tanggal_sk_petugas')) : ?>
-                                <small class="text-danger pl-1"><?= $validation->getError('tanggal_sk_petugas'); ?></small>
-                            <?php endif; ?>
+                            <input type="text" class="form-control gj-datepicker <?= $validation->hasError('tanggal_sk_petugas') ? 'is-invalid' : '' ?>" id="tanggal_sk_petugas" name="tanggal_sk_petugas" placeholder="YYYY-MM-DD" value="<?= old('tanggal_sk_petugas', ($pengajuan['tanggal_sk_petugas'] != '0000-00-00') ? $pengajuan['tanggal_sk_petugas'] : ''); ?>">
+                            <div class="invalid-feedback"><?= $validation->getError('tanggal_sk_petugas') ?></div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="file_sk_petugas">Upload File SK Petugas (.pdf, .jpg, .png, .jpeg maks 2MB) <span id="file_sk_petugas_label_required" class="text-danger" style="display:none;">*</span></label>
                         <div class="custom-file">
-                            <input type="file" class="custom-file-input <?= $validation->hasError('file_sk_petugas') ? 'is-invalid' : ''; ?>" id="file_sk_petugas" name="file_sk_petugas" accept=".pdf,.jpg,.png,.jpeg">
+                            <input type="file" class="custom-file-input <?= $validation->hasError('file_sk_petugas') ? 'is-invalid' : '' ?>" id="file_sk_petugas" name="file_sk_petugas" accept=".pdf,.jpg,.png,.jpeg">
                             <label class="custom-file-label" for="file_sk_petugas"><?= !empty($pengajuan['file_sk_petugas']) ? htmlspecialchars($pengajuan['file_sk_petugas']) : 'Pilih file SK...'; ?></label>
+                            <div class="invalid-feedback"><?= $validation->getError('file_sk_petugas') ?></div>
                         </div>
                         <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <small class="form-text text-info">File SK saat ini:
@@ -118,18 +115,13 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
                                 </a>. Upload file baru akan menggantikannya.
                             </small>
                         <?php endif; ?>
-                        <?php if ($validation->hasError('file_sk_petugas')) : ?>
-                            <div class="invalid-feedback"><?= $validation->getError('file_sk_petugas'); ?></div>
-                        <?php endif; ?>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="admin_notes">Catatan Admin (Jika ditolak, alasan penolakan wajib diisi)</label>
-                    <textarea class="form-control <?= $validation->hasError('admin_notes') ? 'is-invalid' : ''; ?>" id="admin_notes" name="admin_notes" rows="3"><?= old('admin_notes', $pengajuan['admin_notes'] ?? ''); ?></textarea>
-                     <?php if ($validation->hasError('admin_notes')) : ?>
-                        <small class="text-danger pl-1"><?= $validation->getError('admin_notes'); ?></small>
-                    <?php endif; ?>
+                    <textarea class="form-control <?= $validation->hasError('admin_notes') ? 'is-invalid' : '' ?>" id="admin_notes" name="admin_notes" rows="3"><?= old('admin_notes', $pengajuan['admin_notes'] ?? ''); ?></textarea>
+                    <div class="invalid-feedback"><?= $validation->getError('admin_notes') ?></div>
                 </div>
 
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Proses Pengajuan</button>
@@ -138,7 +130,10 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
 
+<?php // <-- Mulai section baru untuk scripts ?>
+<?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const statusPengajuanDropdown = document.getElementById('status_pengajuan');

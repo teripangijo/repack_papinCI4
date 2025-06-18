@@ -1078,12 +1078,22 @@ class Admin extends BaseController
         return view('admin/daftar_pengajuan_kuota', $data);
     }
 
-    // app/Controllers/Admin.php
-
     public function proses_pengajuan_kuota($id_pengajuan)
     {
-        // 1. Ambil data pengajuan SEKALI di awal.
-        // Variabel ini akan tersedia di seluruh bagian fungsi.
+        // // ================= TES DEBUGGING =================
+        // // Baris ini akan mencetak metode request yang dideteksi oleh CodeIgniter
+        // $method = $this->request->getMethod();
+
+        // echo "<h1>Hasil Debugging</h1>";
+        // echo "<p>Request Method yang terdeteksi oleh server adalah: </p>";
+        // echo "<pre>";
+        // var_dump($method);
+        // echo "</pre>";
+
+        // // Kita hentikan eksekusi di sini agar bisa melihat hasilnya dengan jelas.
+        // die("Eksekusi dihentikan untuk debugging. Periksa output di atas.");
+        // // ===============================================
+        // 1. Pengambilan Data Awal
         $builder = $this->db->table('user_pengajuan_kuota upk');
         $builder->select('upk.*, upr.NamaPers, u.email as user_email');
         $builder->join('user_perusahaan upr', 'upk.id_pers = upr.id_pers', 'left');
@@ -1091,35 +1101,52 @@ class Admin extends BaseController
         $builder->where('upk.id', $id_pengajuan);
         $pengajuan = $builder->get()->getRowArray();
 
-        // 2. Validasi awal: pastikan pengajuan ditemukan.
-        if (!$pengajuan) {
-            session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Data pengajuan dengan ID ' . $id_pengajuan . ' tidak ditemukan.</div>');
+        // 2. Validasi Awal (Pastikan pengajuan ada dan statusnya valid)
+        if (!$pengajuan || !in_array($pengajuan['status'], ['pending', 'diproses'])) {
+            $pesan_error = 'Pengajuan kuota tidak ditemukan atau statusnya tidak memungkinkan untuk diproses (Status saat ini: ' . ($pengajuan['status'] ?? 'Tidak Diketahui') . ').';
+            session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">' . $pesan_error . '</div>');
             return redirect()->to('admin/daftar_pengajuan_kuota');
         }
 
-        // 3. Logika HANYA untuk request POST
-        if (strtolower($this->request->getMethod()) === 'post') {
+        // 3. Logika untuk menangani POST (jika form disubmit)
+        if ($this->request->getMethod() === 'post') {
+            
+            // Definisikan aturan validasi dasar
             $rules = [
                 'status_pengajuan' => 'required|in_list[approved,rejected,diproses]',
                 'admin_notes'      => 'trim'
             ];
+
             $status_input = $this->request->getPost('status_pengajuan');
+
+            // Tambahkan aturan jika status 'approved'
             if ($status_input == 'approved') {
                 $rules['approved_quota']     = 'trim|required|numeric|greater_than[0]';
                 $rules['nomor_sk_petugas']   = 'trim|required|max_length[100]';
-                $rules['tanggal_sk_petugas'] = 'trim|required'; // Dibuat tidak terlalu ketat untuk menghindari masalah format
+                // $rules['tanggal_sk_petugas'] = 'trim|required|valid_date[Y-m-d]';
+                // Validasi file upload hanya jika file SK belum ada sebelumnya
+                if (empty($pengajuan['file_sk_petugas'])) {
+                    $rules['file_sk_petugas'] = 'uploaded[file_sk_petugas]|max_size[file_sk_petugas,2048]|ext_in[file_sk_petugas,pdf,jpg,png,jpeg]';
+                }
             }
+            
+            // Wajibkan catatan jika ditolak
             if ($status_input == 'rejected') {
                 $rules['admin_notes'] = 'trim|required';
             }
 
+            // Jalankan Validasi
             if (!$this->validate($rules)) {
+                // Jika validasi gagal, kembali ke form dengan error dan input lama
                 return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
             }
 
-            $this->db->transStart();
+            // Jika validasi berhasil, mulai proses data
+            $this->db->transStart(); // Mulai transaksi database
+
             try {
                 $approved_quota = ($status_input == 'approved') ? (float)$this->request->getPost('approved_quota') : 0;
+
                 $update_data = [
                     'status'             => $status_input,
                     'admin_notes'        => $this->request->getPost('admin_notes'),
@@ -1129,75 +1156,88 @@ class Admin extends BaseController
                     'approved_quota'     => $approved_quota
                 ];
                 
+                // Handle file upload jika ada file baru
                 $skFile = $this->request->getFile('file_sk_petugas');
                 if ($skFile && $skFile->isValid() && !$skFile->hasMoved()) {
                     $uploadPath = FCPATH . 'uploads/sk_kuota/';
                     if (!is_dir($uploadPath)) { @mkdir($uploadPath, 0777, true); }
+
+                    if (!empty($pengajuan['file_sk_petugas']) && file_exists($uploadPath . $pengajuan['file_sk_petugas'])) {
+                        @unlink($uploadPath . $pengajuan['file_sk_petugas']);
+                    }
                     $newName = $skFile->getRandomName();
                     $skFile->move($uploadPath, $newName);
                     $update_data['file_sk_petugas'] = $newName;
                 }
 
+                // Update tabel pengajuan
                 $this->db->table('user_pengajuan_kuota')->where('id', $id_pengajuan)->update($update_data);
-
-                // Gunakan variabel $pengajuan yang sudah kita ambil di atas
+                
+                // Jika disetujui, proses penambahan kuota barang
                 if ($status_input == 'approved' && $approved_quota > 0) {
                     $id_pers = $pengajuan['id_pers'];
                     $nama_barang = $pengajuan['nama_barang_kuota'];
 
-                    // Pengaman tambahan jika data di DB ternyata kosong
-                    if (empty($id_pers) || empty($nama_barang)) {
-                        throw new \Exception("Data ID Perusahaan atau Nama Barang dari pengajuan ini kosong. Tidak bisa menambah kuota.");
-                    }
-                    
+                    // Hapus entri lama jika ada untuk mencegah duplikasi saat mengedit
                     $this->db->table('user_kuota_barang')->where('id_pengajuan_kuota', $id_pengajuan)->delete();
-                    
-                    $kuota_barang_data = [
-                        'id_pers' => $id_pers,
-                        'id_pengajuan_kuota' => $id_pengajuan,
-                        'nama_barang' => $nama_barang,
-                        'initial_quota_barang' => $approved_quota,
-                        'remaining_quota_barang' => $approved_quota,
-                        'nomor_skep_asal' => $update_data['nomor_sk_petugas'],
-                        'tanggal_skep_asal' => $update_data['tanggal_sk_petugas'],
-                        'status_kuota_barang' => 'active',
-                        'dicatat_oleh_user_id' => $this->user['id'],
-                        'waktu_pencatatan' => date('Y-m-d H:i:s')
-                    ];
-                    $this->db->table('user_kuota_barang')->insert($kuota_barang_data);
-                    $id_kuota_barang_baru = $this->db->insertID();
 
-                    $this->_log_perubahan_kuota($id_pers, 'penambahan', $approved_quota, 0, $approved_quota, 'Persetujuan Pengajuan Kuota.', $id_pengajuan, 'pengajuan_kuota_disetujui', $this->user['id'], $nama_barang, $id_kuota_barang_baru);
+                    if ($id_pers && !empty($nama_barang)) {
+                        $kuota_barang_data = [
+                            'id_pers'               => $id_pers,
+                            'id_pengajuan_kuota'    => $id_pengajuan,
+                            'nama_barang'           => $nama_barang,
+                            'initial_quota_barang'  => $approved_quota,
+                            'remaining_quota_barang'=> $approved_quota,
+                            'nomor_skep_asal'       => $update_data['nomor_sk_petugas'],
+                            'tanggal_skep_asal'     => $update_data['tanggal_sk_petugas'],
+                            'status_kuota_barang'   => 'active',
+                            'dicatat_oleh_user_id'  => $this->user['id'],
+                            'waktu_pencatatan'      => date('Y-m-d H:i:s')
+                        ];
+                        $this->db->table('user_kuota_barang')->insert($kuota_barang_data);
+                        $id_kuota_barang_baru = $this->db->insertID();
+
+                        if ($id_kuota_barang_baru) {
+                            $this->_log_perubahan_kuota(
+                                $id_pers, 'penambahan', $approved_quota, 0, $approved_quota,
+                                'Persetujuan Pengajuan Kuota. Barang: ' . $nama_barang . '. No. SK: ' . ($update_data['nomor_sk_petugas'] ?: '-'),
+                                $id_pengajuan, 'pengajuan_kuota_disetujui', $this->user['id'], $nama_barang, $id_kuota_barang_baru
+                            );
+                        }
+                    }
                 }
                 
-                $this->db->transComplete();
+                $this->db->transComplete(); // Selesaikan transaksi
+
                 if ($this->db->transStatus() === false) {
-                    session()->setFlashdata('message', '<div class="alert alert-danger">Terjadi kesalahan saat menyimpan ke database.</div>');
+                    // Terjadi error, rollback
+                    session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Terjadi kesalahan database saat memproses data.</div>');
                     return redirect()->back()->withInput();
+                } else {
+                    // Semua berhasil, commit
+                    session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Pengajuan kuota telah berhasil diproses!</div>');
+                    return redirect()->to('admin/daftar_pengajuan_kuota');
                 }
-
-                session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Pengajuan kuota telah berhasil diproses!</div>');
-                return redirect()->to('admin/daftar_pengajuan_kuota');
-
-            } catch (\Throwable $e) {
+            } catch (\Exception $e) {
                 $this->db->transRollback();
-                log_message('error', '[PROSES KUOTA GAGAL] ' . $e->getMessage() . ' | ' . $e->getTraceAsString());
+                log_message('error', '[ADMIN] Proses Pengajuan Kuota Gagal: ' . $e->getMessage());
                 session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Terjadi kesalahan sistem: ' . $e->getMessage() . '</div>');
                 return redirect()->back()->withInput();
             }
         }
 
-        // 4. Logika untuk request GET (menampilkan form)
+        // 4. Logika untuk menampilkan GET (jika halaman diakses pertama kali atau setelah validasi gagal)
         $data = [
             'title'      => 'Returnable Package',
             'subtitle'   => 'Proses Pengajuan Kuota',
             'user'       => $this->user,
-            'pengajuan'  => $pengajuan, // Variabel dari atas digunakan di sini
-            'validation' => $this->validation,
+            'pengajuan'  => $pengajuan,
+            // 'validation' properti sudah ada di class, tidak perlu di-pass lagi jika view mengaksesnya dari $this
         ];
+
         return view('admin/proses_pengajuan_kuota_form', $data);
     }
-    
+
     public function detailPengajuanKuotaAdmin($id_pengajuan)
     {
         $builder = $this->db->table('user_pengajuan_kuota upk');

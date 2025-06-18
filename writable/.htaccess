@@ -1,6 +1,29 @@
-<IfModule authz_core_module>
-	Require all denied
+#
+# CodeIgniter 4 - Apache Server Configuration
+#
+
+<IfModule mod_rewrite.c>
+    Options +FollowSymLinks
+    RewriteEngine On
+
+    # If you install CodeIgniter in a subdirectory, you will need to
+    # change the following line to match the subdirectory.
+    # e.g. RewriteBase /ci4/
+    # RewriteBase /
+
+    # Redirect trailing slashes if not a folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([\s\S]*)$ index.php/$1 [L,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
-<IfModule !authz_core_module>
-	Deny from all
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
 </IfModule>
+
+# Suppress "server signature" header
+ServerSignature Off

@@ -61,7 +61,8 @@ class Filters extends BaseFilters
                 'except' => [
                     '/', // Halaman utama (login)
                     'auth', // Rute /auth jika ada
-                    'auth/*' // Semua rute yang diawali dengan auth/
+                    'auth/*', // Semua rute yang diawali dengan auth/
+                    'admin*' // Semua rute yang diawali dengan admin/
                 ]
             ],
             // 'honeypot',

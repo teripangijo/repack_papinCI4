@@ -23,10 +23,14 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
         <?= session()->getFlashdata('message'); ?>
     <?php endif; ?>
 
-    <?php if ($validation->getErrors()) : ?>
+    <?php if (session()->has('errors')) : ?>
         <div class="alert alert-danger" role="alert">
             <h5 class="alert-heading">Terjadi Kesalahan Validasi!</h5>
-            Mohon periksa kembali data yang Anda masukkan pada form di bawah ini.
+            <ul>
+                <?php foreach (session('errors') as $error) : ?>
+                    <li><?= esc($error) ?></li>
+                <?php endforeach ?>
+            </ul>
         </div>
     <?php endif; ?>
 
@@ -69,7 +73,7 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
             <hr>
 
             <h5>Form Tindakan Admin</h5>
-            <form action="<?= site_url('admin/proses_pengajuan_kuota/' . $pengajuan['id']); ?>" method="post" enctype="multipart/form-data">
+            <form id="admin-action-form" action="<?= base_url('admin/proses_pengajuan_kuota/' . $pengajuan['id']); ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field(); ?>
                 
                 <div class="form-group">
@@ -124,7 +128,7 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
                     <div class="invalid-feedback"><?= $validation->getError('admin_notes') ?></div>
                 </div>
 
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Proses Pengajuan</button>
+                <button type="submit" id="submit-button" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Proses Pengajuan</button>
                 <a href="<?= site_url('admin/daftar_pengajuan_kuota'); ?>" class="btn btn-secondary ml-2">Batal</a>
             </form>
         </div>
@@ -193,6 +197,22 @@ $(document).ready(function () {
             showOnFocus: true,
             showRightIcon: true,
             autoClose: true
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var a_submitButton = document.getElementById('submit-button');
+    var a_theForm = document.getElementById('admin-action-form');
+
+    if (a_submitButton && a_theForm) {
+        a_submitButton.addEventListener('click', function() {
+            // Nonaktifkan tombol untuk mencegah klik ganda
+            a_submitButton.disabled = true;
+            a_submitButton.innerHTML = 'Menyimpan...';
+
+            // Kirim form secara paksa menggunakan JavaScript
+            a_theForm.submit();
         });
     }
 });

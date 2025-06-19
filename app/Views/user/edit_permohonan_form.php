@@ -37,7 +37,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
         </a>
     </div>
 
-    <?= $validation->listErrors('list') ?>
+    <!-- <?= $validation->listErrors('list') ?> -->
     <!-- Flash Messages (handled by layout) -->
 
     <div class="card shadow mb-4">
@@ -191,6 +191,9 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#TglBongkar').datepicker(datepickerConfig);
     }
 
+    // =================================================================
+    // LOGIKA EDIT KUOTA (SUDAH ADA - JANGAN DIUBAH)
+    // =================================================================
     const jumlahBarangLamaDiPermohonan = parseFloat(<?= json_encode($permohonan_edit['JumlahBarang'] ?? 0) ?>);
     const idKuotaBarangLamaDiPermohonan = parseInt(<?= json_encode($permohonan_edit['id_kuota_barang_digunakan'] ?? 0) ?>);
     const initialSelectedIdKuotaBarang = $('#id_kuota_barang_selected_dropdown').val();
@@ -251,13 +254,11 @@ document.addEventListener('DOMContentLoaded', function () {
             submitButton.prop('disabled', true).attr('title', 'Pilih barang berkuota terlebih dahulu.');
             return;
         }
-
         if (jumlahDimohon > sisaKuotaMax) {
             $(this).val(sisaKuotaMax);
             $('#sisaKuotaInfoEdit').append(' <strong class="text-danger">(Jumlah melebihi sisa efektif!)</strong>');
             jumlahDimohon = sisaKuotaMax;
         }
-
         if (jumlahDimohon <= 0) {
             submitButton.prop('disabled', true).attr('title', 'Jumlah barang harus lebih dari 0.');
         } else if (sisaKuotaMax > 0 && jumlahDimohon <= sisaKuotaMax) {
@@ -269,8 +270,58 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('#file_bc_manifest_edit').on('change', function() {
         let fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        if(fileName) {
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        }
     });
+
+    // =================================================================
+    // BAGIAN YANG DITAMBAHKAN (UNTUK VALIDASI DINAMIS)
+    // =================================================================
+
+    // 1. Logika untuk Validasi Dinamis Input Standar
+    function initializeDynamicValidation() {
+        const invalidInputs = document.querySelectorAll('.is-invalid');
+        invalidInputs.forEach(function(input) {
+            const validationHandler = function(event) {
+                const currentInput = event.target;
+                if ((currentInput.type === 'file' && currentInput.files.length > 0) || (currentInput.type !== 'file' && currentInput.value.trim() !== '')) {
+                    currentInput.classList.remove('is-invalid');
+                    let feedbackElement;
+                    if (currentInput.parentElement.classList.contains('custom-file')) {
+                        feedbackElement = currentInput.parentElement.nextElementSibling;
+                    } else {
+                        feedbackElement = currentInput.nextElementSibling;
+                    }
+                    if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+                        feedbackElement.style.display = 'none';
+                    }
+                    currentInput.removeEventListener('input', validationHandler);
+                    currentInput.removeEventListener('change', validationHandler);
+                }
+            };
+            input.addEventListener('input', validationHandler);
+            input.addEventListener('change', validationHandler);
+        });
+    }
+    initializeDynamicValidation();
+
+    // 2. Perbaikan untuk Validasi Gijgo Datepicker
+    if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
+        $('.gj-datepicker').each(function() {
+            var $datepickerInput = $(this);
+            $datepickerInput.on('change', function(e) {
+                var inputElement = e.target;
+                if (inputElement.value) {
+                    $datepickerInput.removeClass('is-invalid');
+                    var $feedbackElement = $datepickerInput.next('.invalid-feedback');
+                    if ($feedbackElement.length) {
+                        $feedbackElement.hide();
+                    }
+                }
+            });
+        });
+    }
 });
 </script>
 <?= $this->endSection() ?>

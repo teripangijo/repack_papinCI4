@@ -32,7 +32,7 @@ if (!empty($selected_id_kuota_barang_js) && !empty($list_barang_berkuota)) {
         </a>
     </div>
 
-    <?= $validation->listErrors('list') ?>
+    <!-- <?= $validation->listErrors('list') ?> -->
     <!-- Flash Messages are handled by the main layout -->
 
     <div class="card shadow mb-4">
@@ -164,6 +164,7 @@ if (!empty($selected_id_kuota_barang_js) && !empty($list_barang_berkuota)) {
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Inisialisasi Datepicker
     if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
         const datepickerConfig = { uiLibrary: 'bootstrap4', format: 'yyyy-mm-dd', showOnFocus: true, showRightIcon: true, autoClose: true };
         $('#TglSurat').datepicker(datepickerConfig);
@@ -171,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#TglBongkar').datepicker(datepickerConfig);
     }
 
+    // Logika untuk Kuota Barang
     const kuotaSelect = document.getElementById('id_kuota_barang_selected');
     const submitBtn = document.getElementById('submitPermohonanBtn');
     const jumlahInput = document.getElementById('JumlahBarang');
@@ -198,40 +200,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    kuotaSelect.addEventListener('change', function() {
-        jumlahInput.value = ''; // Reset jumlah on change
-        updateFormState();
-    });
-    
-    jumlahInput.addEventListener('input', function() {
-        let jumlahDimohon = parseInt(this.value) || 0;
-        const sisaKuotaMax = parseInt(this.getAttribute('max')) || 0;
-        
-        document.querySelector('#sisaKuotaInfo .text-danger')?.remove();
-
-        if (jumlahDimohon > sisaKuotaMax && kuotaSelect.value !== "") {
-            this.value = sisaKuotaMax;
-            document.getElementById('sisaKuotaInfo').insertAdjacentHTML('beforeend', ' <strong class="text-danger">(Jumlah melebihi sisa!)</strong>');
-            jumlahDimohon = sisaKuotaMax;
-        }
-        
-        if(kuotaSelect.value === "") {
-            submitBtn.disabled = true;
-            submitBtn.title = 'Pilih barang berkuota terlebih dahulu.';
-        } else if (jumlahDimohon <= 0) {
-            submitBtn.disabled = true;
-            submitBtn.title = 'Jumlah barang harus lebih dari 0.';
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.title = '';
-        }
-    });
-
-    // Initial check
     if(kuotaSelect){
-        updateFormState();
+        kuotaSelect.addEventListener('change', function() {
+            jumlahInput.value = ''; // Reset jumlah on change
+            updateFormState();
+        });
+        updateFormState(); // Initial check
     }
     
+    if(jumlahInput){
+        jumlahInput.addEventListener('input', function() {
+            let jumlahDimohon = parseInt(this.value) || 0;
+            const sisaKuotaMax = parseInt(this.getAttribute('max')) || 0;
+            
+            document.querySelector('#sisaKuotaInfo .text-danger')?.remove();
+
+            if (jumlahDimohon > sisaKuotaMax && kuotaSelect.value !== "") {
+                this.value = sisaKuotaMax;
+                document.getElementById('sisaKuotaInfo').insertAdjacentHTML('beforeend', ' <strong class="text-danger">(Jumlah melebihi sisa!)</strong>');
+                jumlahDimohon = sisaKuotaMax;
+            }
+            
+            if(kuotaSelect.value === "") {
+                submitBtn.disabled = true;
+                submitBtn.title = 'Pilih barang berkuota terlebih dahulu.';
+            } else if (jumlahDimohon <= 0) {
+                submitBtn.disabled = true;
+                submitBtn.title = 'Jumlah barang harus lebih dari 0.';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.title = '';
+            }
+        });
+    }
+    
+    // Logika untuk Label Custom File Input
     document.querySelectorAll('.custom-file-input').forEach(function(input) {
         const label = input.nextElementSibling;
         const originalText = label.innerHTML;
@@ -240,6 +243,58 @@ document.addEventListener('DOMContentLoaded', function () {
             label.innerHTML = fileName;
         });
     });
+
+    // Logika untuk Validasi Dinamis Input Standar
+    function initializeDynamicValidation() {
+        const invalidInputs = document.querySelectorAll('.is-invalid');
+        invalidInputs.forEach(function(input) {
+            const validationHandler = function(event) {
+                const currentInput = event.target;
+                if ((currentInput.type === 'file' && currentInput.files.length > 0) || (currentInput.type !== 'file' && currentInput.value.trim() !== '')) {
+                    currentInput.classList.remove('is-invalid');
+                    let feedbackElement;
+                    if (currentInput.parentElement.classList.contains('custom-file')) {
+                        feedbackElement = currentInput.parentElement.nextElementSibling;
+                    } else {
+                        feedbackElement = currentInput.nextElementSibling;
+                    }
+                    if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+                        feedbackElement.style.display = 'none';
+                    }
+                    currentInput.removeEventListener('input', validationHandler);
+                    currentInput.removeEventListener('change', validationHandler);
+                }
+            };
+            input.addEventListener('input', validationHandler);
+            input.addEventListener('change', validationHandler);
+        });
+    }
+    initializeDynamicValidation();
+
+    // =================================================================
+    // KODE BARU: PERBAIKAN UNTUK VALIDASI GIJGO DATEPICKER
+    // =================================================================
+    if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
+        // Target semua input yang menggunakan gj-datepicker
+        $('.gj-datepicker').each(function() {
+            var $datepickerInput = $(this);
+            
+            // Dengarkan event 'change' dari plugin Gijgo Datepicker
+            $datepickerInput.on('change', function(e) {
+                var inputElement = e.target;
+                // Jika input sudah memiliki nilai (setelah dipilih)
+                if (inputElement.value) {
+                    // Hapus class 'is-invalid' untuk menghilangkan border merah
+                    $datepickerInput.removeClass('is-invalid');
+                    // Cari elemen .invalid-feedback berikutnya dan sembunyikan
+                    var $feedbackElement = $datepickerInput.next('.invalid-feedback');
+                    if ($feedbackElement.length) {
+                        $feedbackElement.hide();
+                    }
+                }
+            });
+        });
+    }
 });
 </script>
 <?= $this->endSection() ?>

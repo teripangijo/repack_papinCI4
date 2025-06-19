@@ -3,7 +3,7 @@
 $session = session();
 $role_id = $session->get('role_id');
 $user_name = $session->get('name'); // Ambil nama dari sesi
-$user_image = $session->get('user_image') ?? 'default.jpg'; // Ambil gambar profil dari sesi
+$user_image = $session->get('user_image') ?? 'default.webp'; // Ambil gambar profil dari sesi
 $uri = service('uri');
 
 // Logika untuk menentukan dashboard link dan teks brand berdasarkan role_id
@@ -257,7 +257,7 @@ if ($role_id) {
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Repack Papin <?= date('Y') ?></span>
+                        <span>Copyright &copy; Bea Cukai Pangkalpinang <?= date('Y') ?></span>
                     </div>
                 </div>
             </footer>

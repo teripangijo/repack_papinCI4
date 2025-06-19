@@ -250,7 +250,7 @@ class User extends BaseController
 
             if ($nama_file_profile_image !== null && $nama_file_profile_image != ($data['user']['image'] ?? 'default.jpg')) {
                 $this->db->table('user')->where('id', $id_user_login)->update(['image' => $nama_file_profile_image]);
-                $this->session->set('image', $nama_file_profile_image);
+                $this->session->set('user_image', $nama_file_profile_image);
             }
 
             $data_perusahaan = [

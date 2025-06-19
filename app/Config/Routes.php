@@ -122,13 +122,74 @@ $routes->group('user', ['filter' => 'auth'], static function ($routes) {
 });
 
 //====================================================================
-// PETUGAS ROUTES
+// PETUGAS ADMINISTRASI ROUTES
 //====================================================================
+$routes->group('petugas_administrasi', ['filter' => 'auth'], static function ($routes) {
+    // Dashboard
+    $routes->get('/', 'Petugas_administrasi::index');
+    $routes->get('index', 'Petugas_administrasi::index');
 
+    // Profil & MFA Management
+    $routes->match(['GET', 'POST'], 'edit_profil', 'Petugas_administrasi::edit_profil');
+    $routes->get('setup_mfa', 'Petugas_administrasi::setup_mfa');
+    $routes->post('verify_mfa', 'Petugas_administrasi::verify_mfa');
+    $routes->get('reset_mfa', 'Petugas_administrasi::reset_mfa');
+
+    // Permohonan Management
+    $routes->get('permohonanMasuk', 'Petugas_administrasi::permohonanMasuk');
+    $routes->get('detail_permohonan_admin/(:num)', 'Petugas_administrasi::detail_permohonan_admin/$1');
+    $routes->get('hapus_permohonan/(:num)', 'Petugas_administrasi::hapus_permohonan/$1');
+    $routes->match(['GET', 'POST'], 'edit_permohonan/(:num)', 'Petugas_administrasi::edit_permohonan/$1');
+    $routes->match(['GET', 'POST'], 'prosesSurat/(:num)', 'Petugas_administrasi::prosesSurat/$1');
+    $routes->match(['GET', 'POST'], 'penunjukanPetugas/(:num)', 'Petugas_administrasi::penunjukanPetugas/$1');
+    $routes->match(['GET', 'POST'], 'tolak_permohonan_awal/(:num)', 'Petugas_administrasi::tolak_permohonan_awal/$1');
+    
+    // Kuota Management
+    $routes->get('monitoring_kuota', 'Petugas_administrasi::monitoring_kuota');
+    $routes->get('histori_kuota_perusahaan/(:num)', 'Petugas_administrasi::histori_kuota_perusahaan/$1');
+    $routes->get('daftar_pengajuan_kuota', 'Petugas_administrasi::daftar_pengajuan_kuota');
+    $routes->match(['GET', 'POST'], 'proses_pengajuan_kuota/(:num)', 'Petugas_administrasi::proses_pengajuan_kuota/$1');
+    $routes->get('detailPengajuanKuotaAdmin/(:num)', 'Petugas_administrasi::detailPengajuanKuotaAdmin/$1');
+    $routes->get('print_pengajuan_kuota/(:num)', 'Petugas_administrasi::print_pengajuan_kuota/$1');
+    
+    // Download Routes
+    $routes->get('download_sk_kuota_admin/(:num)', 'Petugas_administrasi::download_sk_kuota_admin/$1');
+    // Generic download route for files from detail pages (bc_manifest, surat_tugas, lhp, etc.)
+    // Example: /petugas_administrasi/download/bc_manifest/filename.pdf
+    $routes->get('download/(:segment)/(:any)', 'Petugas_administrasi::download/$1/$2');
+
+    // Upload-related routes (from upload view)
+    $routes->get('upload', 'Petugas_administrasi::upload');
+    $routes->match(['GET', 'POST'], 'uploadproses/(:num)', 'Petugas_administrasi::uploadproses/$1');
+});
+
+//====================================================================
+// PETUGAS (PEMERIKSA) ROUTES
+//====================================================================
 $routes->group('petugas', ['filter' => 'auth'], static function ($routes) {
-    // Add petugas routes here when needed
+    // Dashboard
     $routes->get('/', 'Petugas::index');
-    // ... other petugas routes
+    $routes->get('index', 'Petugas::index');
+
+    // Profil, Password & MFA
+    $routes->match(['GET', 'POST'], 'edit_profil', 'Petugas::edit_profil');
+    $routes->match(['GET', 'POST'], 'force_change_password_page', 'Petugas::force_change_password_page');
+    $routes->get('setup_mfa', 'Petugas::setup_mfa');
+    $routes->post('verify_mfa', 'Petugas::verify_mfa');
+    $routes->get('reset_mfa', 'Petugas::reset_mfa');
+
+    // LHP Management
+    $routes->get('daftar_pemeriksaan', 'Petugas::daftar_pemeriksaan');
+    $routes->match(['GET', 'POST'], 'rekam_lhp/(:num)', 'Petugas::rekam_lhp/$1');
+    $routes->get('riwayat_lhp_direkam', 'Petugas::riwayat_lhp_direkam');
+    $routes->get('detail_lhp_direkam/(:num)', 'Petugas::detail_lhp_direkam/$1');
+    
+    // Monitoring
+    $routes->get('monitoring_permohonan', 'Petugas::monitoring_permohonan');
+    $routes->get('detail_monitoring_permohonan/(:num)', 'Petugas::detail_monitoring_permohonan/$1');
+    
+    // Download route for files
+    $routes->get('download/(:segment)/(:any)', 'Petugas::download/$1/$2');
 });
 
 //====================================================================

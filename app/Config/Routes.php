@@ -195,9 +195,27 @@ $routes->group('petugas', ['filter' => 'auth'], static function ($routes) {
 //====================================================================
 // MONITORING ROUTES
 //====================================================================
-
 $routes->group('monitoring', ['filter' => 'auth'], static function ($routes) {
-    // Add monitoring routes here when needed
+    // Dashboard
     $routes->get('/', 'Monitoring::index');
-    // ... other monitoring routes
+    $routes->get('index', 'Monitoring::index');
+
+    // Profil, Password & MFA
+    $routes->match(['GET', 'POST'], 'edit_profil', 'Monitoring::edit_profil');
+    $routes->get('setup_mfa', 'Monitoring::setup_mfa');
+    $routes->post('verify_mfa', 'Monitoring::verify_mfa');
+    $routes->get('reset_mfa', 'Monitoring::reset_mfa');
+
+    // Pantauan Pengajuan Kuota
+    $routes->get('pengajuan_kuota', 'Monitoring::pengajuan_kuota');
+    $routes->get('detail_pengajuan_kuota/(:num)', 'Monitoring::detail_pengajuan_kuota/$1');
+
+    // Pantauan Permohonan Impor
+    $routes->get('permohonan_impor', 'Monitoring::permohonan_impor');
+    $routes->get('detail_permohonan_impor/(:num)', 'Monitoring::detail_permohonan_impor/$1');
+    
+    // Pantauan Kuota Perusahaan
+    $routes->get('pantau_kuota_perusahaan', 'Monitoring::pantau_kuota_perusahaan');
+    $routes->get('detail_kuota_perusahaan/(:num)', 'Monitoring::detail_kuota_perusahaan/$1');
 });
+

@@ -484,7 +484,9 @@ class Admin extends BaseController
 
     public function ganti_password_user($target_user_id = 0)
     {
-        if ($target_user_id == 0 || $target_user_id == 1) {
+        // Mencegah admin mengubah password super admin (asumsi id = 1) atau user yang tidak valid
+        if ($target_user_id <= 1) {
+            session()->setFlashdata('message', '<div class="alert alert-warning" role="alert">Aksi tidak diizinkan untuk user ini.</div>');
             return redirect()->to('admin/manajemen_user');
         }
 
@@ -494,33 +496,62 @@ class Admin extends BaseController
             return redirect()->to('admin/manajemen_user');
         }
 
-        $data = [
-            'title' => 'Returnable Package',
-            'subtitle' => 'Ganti Password User',
-            'user' => $this->user,
-            'target_user' => $target_user,
-            'validation' => $this->validation,
-        ];
+        // Menggunakan service validation dari CI4
+        $validation = \Config\Services::validation();
 
+        // Aturan validasi yang diperbaiki
+        // 'matches' hanya diperlukan pada field konfirmasi.
         $rules = [
-            'new_password' => 'required|trim|min_length[6]|matches[confirm_password]',
-            'confirm_password' => 'required|trim|matches[new_password]'
+            'new_password' => [
+                'label'  => 'Password Baru',
+                'rules'  => 'required|trim|min_length[6]',
+                'errors' => [
+                    'required'   => 'Kolom {field} wajib diisi.',
+                    'min_length' => 'Kolom {field} minimal harus 6 karakter.'
+                ]
+            ],
+            'confirm_password' => [
+                'label'  => 'Konfirmasi Password',
+                'rules'  => 'required|trim|matches[new_password]',
+                'errors' => [
+                    'required' => 'Kolom {field} wajib diisi.',
+                    'matches'  => 'Konfirmasi password tidak cocok dengan password baru.'
+                ]
+            ]
         ];
 
-        if ($this->request->getMethod() === 'post' && $this->validate($rules)) {
+        // Cek jika request adalah POST dan validasi berhasil
+        // FIX: Menggunakan $this->request->is('post') yang menangani case-insensitivity.
+        if ($this->request->is('post') && $this->validate($rules)) {
+            
             $new_password_hash = password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT);
+            
             $update_data = [
                 'password' => $new_password_hash,
-                'force_change_password' => 1
+                // Password diubah oleh admin, jadi user tidak perlu dipaksa ganti lagi.
+                'force_change_password' => 0 
             ];
 
             $this->db->table('user')->where('id', $target_user_id)->update($update_data);
-            session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Password untuk user ' . htmlspecialchars($target_user['name']) . ' berhasil diubah.</div>');
+            
+            session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Password untuk user ' . htmlspecialchars($target_user['name']) . ' berhasil diperbarui.</div>');
+            
             return redirect()->to('admin/manajemen_user');
         }
+        
+        // Jika validasi gagal atau request adalah GET, tampilkan view dengan data
+        $data = [
+            'title'       => 'Returnable Package',
+            'subtitle'    => 'Ganti Password User',
+            'user'        => $this->user, // Asumsi $this->user sudah tersedia
+            'target_user' => $target_user,
+            'validation'  => $validation // Mengirimkan service validation ke view
+        ];
 
         return view('admin/form_ganti_password_user', $data);
     }
+
+
 
     public function edit_user($target_user_id = 0)
     {

@@ -50,8 +50,9 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
                     <p><strong>Tanggal Pengajuan Sistem:</strong> <?= isset($pengajuan['submission_date']) ? date('d M Y H:i:s', strtotime($pengajuan['submission_date'])) : 'N/A' ?></p>
                      <?php if (!empty($pengajuan['file_lampiran_user'])): ?>
                         <p><strong>File Lampiran User:</strong>
-                            <a href="<?= site_url('user/download_lampiran_kuota/' . $pengajuan['id']) ?>" target="_blank">
-                                <?= esc($pengajuan['file_lampiran_user']) ?>
+                            <!-- [DIREVISI] Mengarahkan link ke method downloadFile -->
+                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_lampiran_user']) ?>" target="_blank">
+                                Lihat Lampiran
                             </a>
                         </p>
                     <?php endif; ?>
@@ -90,12 +91,12 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
                         <label for="file_sk_petugas">Upload File SK Petugas (.pdf, .jpg, .png, .jpeg maks 2MB) <span id="file_sk_petugas_label_required" class="text-danger" style="display:none;">*</span></label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="file_sk_petugas" name="file_sk_petugas">
-                            <label class="custom-file-label" for="file_sk_petugas"><?= !empty($pengajuan['file_sk_petugas']) ? esc($pengajuan['file_sk_petugas']) : 'Pilih file SK...' ?></label>
+                            <label class="custom-file-label" for="file_sk_petugas">Pilih file SK...</label>
                         </div>
                         <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <small class="form-text text-info">File SK saat ini:
-                                <a href="<?= site_url('petugas_administrasi/download_sk_kuota_admin/' . $pengajuan['id']) ?>" target="_blank">
-                                    <?= esc($pengajuan['file_sk_petugas']) ?>
+                                <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']) ?>" target="_blank">
+                                    Lihat File SK Saat Ini
                                 </a>. Upload file baru akan menggantikannya.
                             </small>
                         <?php endif; ?>

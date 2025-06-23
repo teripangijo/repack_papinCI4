@@ -83,6 +83,12 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="file_surat_keputusan">Upload File Surat Persetujuan (Opsional)</label>
+                                    <?php if (!empty($permohonan['file_surat_keputusan'])): ?>
+                                        <small class="form-text text-info d-block mb-2">File saat ini: 
+                                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . $permohonan['file_surat_keputusan']) ?>" target="_blank">Lihat File</a>. 
+                                            Upload baru akan menggantikannya.
+                                        </small>
+                                    <?php endif; ?>
                                     <div class="custom-file">
                                         <input type="file" class="custom-file-input" id="file_surat_keputusan" name="file_surat_keputusan">
                                         <label class="custom-file-label" for="file_surat_keputusan">Pilih file...</label>

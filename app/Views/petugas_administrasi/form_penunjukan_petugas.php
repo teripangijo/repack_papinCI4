@@ -81,12 +81,12 @@
                     <label for="file_surat_tugas">Upload File Surat Tugas (PDF, JPG, PNG, DOC, DOCX maks 2MB)</label>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input <?= (isset($validation) && $validation->hasError('file_surat_tugas')) ? 'is-invalid' : '' ?>" id="file_surat_tugas" name="file_surat_tugas">
-                        <label class="custom-file-label" for="file_surat_tugas"><?= (isset($permohonan['FileSuratTugas']) && !empty($permohonan['FileSuratTugas'])) ? esc($permohonan['FileSuratTugas']) : 'Pilih file...' ?></label>
+                        <label class="custom-file-label" for="file_surat_tugas">Pilih file...</label>
                     </div>
                     <?php if (!empty($permohonan['FileSuratTugas'])): ?>
                         <small class="form-text text-muted mt-1">File saat ini:
-                            <a href="<?= site_url('petugas_administrasi/download/surat_tugas/' . esc($permohonan['FileSuratTugas'])) ?>" target="_blank">
-                                <?= esc($permohonan['FileSuratTugas']) ?>
+                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . esc($permohonan['FileSuratTugas'])) ?>" target="_blank">
+                                Lihat File Saat Ini
                             </a>. Pilih file baru akan menggantikannya.
                         </small>
                     <?php endif; ?>
@@ -118,7 +118,6 @@ $(document).ready(function(){
         console.error("Datepicker library is not loaded.");
     }
 
-    // Script to display the file name in the custom file input
     $('.custom-file-input').on('change', function(event) {
         var inputFile = event.target;
         if (inputFile.files.length > 0) {
@@ -128,26 +127,21 @@ $(document).ready(function(){
     });
 
     // =================================================================
-    // BAGIAN YANG DITAMBAHKAN (UNTUK VALIDASI DINAMIS)
+    // VALIDASI DINAMIS
     // =================================================================
     function initializeDynamicValidation() {
-        // Select all form elements that are initially marked as invalid
         const invalidInputs = document.querySelectorAll('.is-invalid');
         
         invalidInputs.forEach(function(input) {
-            // Define the handler function
             const validationHandler = function(event) {
                 const currentInput = event.target;
                 
-                // Check if the input now has a value or a file
                 if ((currentInput.type === 'file' && currentInput.files.length > 0) || (currentInput.type !== 'file' && currentInput.value.trim() !== '')) {
-                    // Remove the invalid class from the input
                     currentInput.classList.remove('is-invalid');
                     
                     let feedbackElement;
                     
                     if (currentInput.parentElement.classList.contains('custom-file')) {
-                        // For Bootstrap custom file inputs, find the next 'invalid-feedback' sibling
                         let sibling = currentInput.parentElement.nextElementSibling;
                         while(sibling) {
                             if (sibling.classList.contains('invalid-feedback')) {
@@ -157,28 +151,23 @@ $(document).ready(function(){
                             sibling = sibling.nextElementSibling;
                         }
                     } else {
-                        // For standard inputs, the feedback element is typically the next sibling
                         feedbackElement = currentInput.nextElementSibling;
                     }
                     
-                    // Hide the feedback element if found
                     if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
                         feedbackElement.style.display = 'none';
                     }
                     
-                    // Remove the event listener to prevent it from running again
                     currentInput.removeEventListener('input', validationHandler);
                     currentInput.removeEventListener('change', validationHandler);
                 }
             };
             
-            // Attach the event listener for 'input' (for text fields) and 'change' (for select/file)
             input.addEventListener('input', validationHandler);
             input.addEventListener('change', validationHandler);
         });
     }
-    
-    // Call the function to initialize the behavior on page load
+
     initializeDynamicValidation();
 });
 </script>

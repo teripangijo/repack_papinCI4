@@ -50,8 +50,7 @@
                          <?php if (!empty($pengajuan['file_lampiran_user'])): ?>
                         <tr>
                             <th>Lampiran User</th>
-                            <!-- Asumsi ada route 'user/download_lampiran_kuota' -->
-                            <td>: <a href="<?= site_url('user/download_lampiran_kuota/' . $pengajuan['id']) ?>" target="_blank"><?= esc($pengajuan['file_lampiran_user']) ?></a></td>
+                            <td>: <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_lampiran_user']) ?>" target="_blank">Lihat Lampiran</a></td>
                         </tr>
                         <?php endif; ?>
                     </table>
@@ -97,7 +96,7 @@
                             <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <tr>
                                 <th>File SK Petugas</th>
-                                <td>: <a href="<?= site_url('petugas_administrasi/download_sk_kuota_admin/' . $pengajuan['id']) ?>" target="_blank"><?= esc($pengajuan['file_sk_petugas']) ?></a></td>
+                                <td>: <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']) ?>" target="_blank">Lihat File SK</a></td>
                             </tr>
                             <?php endif; ?>
                         <?php endif; ?>

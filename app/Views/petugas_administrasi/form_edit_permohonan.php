@@ -122,9 +122,8 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
                     <label>File BC 1.1 / Manifest Saat Ini:</label>
                     <?php if (!empty($permohonan_edit['file_bc_manifest'])): ?>
                         <p>
-                            <!-- Pastikan ada route untuk download aman -->
-                            <a href="<?= site_url('petugas_administrasi/download/bc_manifest/' . esc($permohonan_edit['file_bc_manifest'])) ?>" target="_blank" class="btn btn-sm btn-outline-info">
-                                <i class="fas fa-file-pdf"></i> <?= esc($permohonan_edit['file_bc_manifest']) ?>
+                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . esc($permohonan_edit['file_bc_manifest'])) ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-file-pdf"></i> Lihat File Saat Ini
                             </a>
                         </p>
                     <?php else: ?>

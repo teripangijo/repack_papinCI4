@@ -42,7 +42,7 @@
                     <div class="col-sm-9">
                         <div class="row">
                             <div class="col-sm-3">
-                                <img src="<?= base_url('uploads/profile_images/' . esc($user['image'] ?? 'default.jpg')) ?>" class="img-thumbnail" alt="Profile Image">
+                                <img src="<?= site_url('petugas_administrasi/downloadFile/' . esc($user['image'] ?? 'default.jpg')) ?>" class="img-thumbnail" alt="Profile Image">
                             </div>
                             <div class="col-sm-9">
                                 <div class="custom-file">

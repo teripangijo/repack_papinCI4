@@ -1,6 +1,7 @@
 <?php
 namespace App\Controllers;
 use App\Controllers\BaseController;
+use App\Libraries\TobaUploader;
 use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -86,17 +87,23 @@ class Admin extends BaseController
 
             $profileImage = $this->request->getFile('profile_image');
             if ($profileImage && $profileImage->isValid() && !$profileImage->hasMoved()) {
-                $old_image = $this->user['image'];
-                if ($old_image && $old_image != 'default.jpg' && file_exists(FCPATH . 'uploads/profile_images/' . $old_image)) {
-                    @unlink(FCPATH . 'uploads/profile_images/' . $old_image);
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($profileImage);
+
+                    if ($uploadResult && isset($uploadResult['status']) && $uploadResult['status'] === 'success') {
+                        $newFileKey = $uploadResult['data']['keyFile']; // Simpan keyFile
+                        $this->db->table('user')->where('id', $user_id)->update(['image' => $newFileKey]);
+                        session()->set('image', $newFileKey);
+                        session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Foto profil berhasil diupdate.</div>');
+                    } else {
+                        $errorMessage = $uploadResult['message'] ?? 'Gagal mengunggah file ke server hosting.';
+                        session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">' . htmlspecialchars($errorMessage) . '</div>');
+                    }
+                } catch (\Exception $e) {
+                    log_message('error', '[TobaUploader Exception] ' . $e->getMessage());
+                    session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal memproses upload: ' . $e->getMessage() . '</div>');
                 }
-
-                $newName = $profileImage->getRandomName();
-                $profileImage->move(FCPATH . 'uploads/profile_images', $newName);
-
-                $this->db->table('user')->where('id', $user_id)->update(['image' => $newName]);
-                session()->set('image', $newName);
-                session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Foto profil berhasil diupdate.</div>');
             }
 
             return redirect()->to('admin/edit_profil');
@@ -673,21 +680,11 @@ class Admin extends BaseController
     public function hapus_permohonan($id_permohonan = 0)
     {
         $permohonan = $this->db->table('user_permohonan')->where('id', $id_permohonan)->get()->getRowArray();
-        if (!$id_permohonan || !$permohonan) {
-            session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Permohonan tidak ditemukan.</div>');
-            return redirect()->to('admin/permohonanMasuk');
+        if (!$permohonan) {
+            throw PageNotFoundException::forPageNotFound('Permohonan tidak ditemukan.');
         }
-
-        $filePath = FCPATH . 'uploads/bc_manifest/' . $permohonan['file_bc_manifest'];
-        if (!empty($permohonan['file_bc_manifest']) && file_exists($filePath)) {
-            @unlink($filePath);
-        }
-
-        if ($this->db->table('user_permohonan')->where('id', $id_permohonan)->delete()) {
-            session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Permohonan berhasil dihapus.</div>');
-        } else {
-            session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal menghapus permohonan.</div>');
-        }
+        $this->db->table('user_permohonan')->where('id', $id_permohonan)->delete();
+        session()->setFlashdata('message', '<div class="alert alert-success" role="alert">Permohonan berhasil dihapus.</div>');
         return redirect()->to('admin/permohonanMasuk');
     }
 
@@ -766,19 +763,20 @@ class Admin extends BaseController
             ];
 
             $suratTugasFile = $this->request->getFile('file_surat_tugas');
-            if ($suratTugasFile && $suratTugasFile->isValid() && !$suratTugasFile->hasMoved()) {
-                $uploadPath = FCPATH . 'uploads/surat_tugas/';
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
+            if ($suratTugasFile && $suratTugasFile->isValid()) {
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($suratTugasFile);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $update_data['FileSuratTugas'] = $uploadResult['data']['keyFile']; // Simpan keyFile
+                    } else {
+                        session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">'.($uploadResult['message'] ?? 'Gagal upload surat tugas.').'</div>');
+                        return redirect()->back()->withInput();
+                    }
+                } catch (\Exception $e) {
+                    session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error: '.$e->getMessage().'</div>');
+                    return redirect()->back()->withInput();
                 }
-
-                if (!empty($permohonan['FileSuratTugas']) && file_exists($uploadPath . $permohonan['FileSuratTugas'])) {
-                    @unlink($uploadPath . $permohonan['FileSuratTugas']);
-                }
-
-                $newName = $suratTugasFile->getRandomName();
-                $suratTugasFile->move($uploadPath, $newName);
-                $update_data['FileSuratTugas'] = $newName;
             }
 
             $this->db->table('user_permohonan')->where('id', $id_permohonan)->update($update_data);
@@ -845,24 +843,20 @@ class Admin extends BaseController
             ];
 
             $skFile = $this->request->getFile('file_surat_keputusan');
-            if ($status_final == '3' && $skFile && $skFile->isValid() && !$skFile->hasMoved()) {
-                $uploadPath = FCPATH . 'uploads/sk_penyelesaian/';
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
+            if ($status_final == '3' && $skFile && $skFile->isValid()) {
+                 try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($skFile);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $data_update['file_surat_keputusan'] = $uploadResult['data']['keyFile']; // Simpan keyFile
+                    } else {
+                        session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">'.($uploadResult['message'] ?? 'Gagal upload surat keputusan.').'</div>');
+                        return redirect()->back()->withInput();
+                    }
+                } catch (\Exception $e) {
+                    session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error: '.$e->getMessage().'</div>');
+                    return redirect()->back()->withInput();
                 }
-
-                if (!empty($permohonan['file_surat_keputusan']) && file_exists($uploadPath . $permohonan['file_surat_keputusan'])) {
-                    @unlink($uploadPath . $permohonan['file_surat_keputusan']);
-                }
-
-                $newName = $skFile->getRandomName();
-                $skFile->move($uploadPath, $newName);
-                $data_update['file_surat_keputusan'] = $newName;
-            } elseif ($status_final == '4') {
-                if (!empty($permohonan['file_surat_keputusan']) && file_exists(FCPATH . 'uploads/sk_penyelesaian/' . $permohonan['file_surat_keputusan'])) {
-                    @unlink(FCPATH . 'uploads/sk_penyelesaian/' . $permohonan['file_surat_keputusan']);
-                }
-                $data_update['file_surat_keputusan'] = null;
             }
 
             $this->db->table('user_permohonan')->where('id', $id_permohonan)->update($data_update);
@@ -997,19 +991,20 @@ class Admin extends BaseController
             ];
 
             $bcFile = $this->request->getFile('file_bc_manifest_admin_edit');
-            if ($bcFile && $bcFile->isValid() && !$bcFile->hasMoved()) {
-                $uploadPath = FCPATH . 'uploads/bc_manifest/';
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
+            if ($bcFile && $bcFile->isValid()) {
+                 try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($bcFile);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $update_data['file_bc_manifest'] = $uploadResult['data']['keyFile']; // Simpan keyFile
+                    } else {
+                        session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">'.($uploadResult['message'] ?? 'Gagal upload BC Manifest.').'</div>');
+                        return redirect()->back()->withInput();
+                    }
+                } catch (\Exception $e) {
+                    session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error: '.$e->getMessage().'</div>');
+                    return redirect()->back()->withInput();
                 }
-
-                if (!empty($permohonan['file_bc_manifest']) && file_exists($uploadPath . $permohonan['file_bc_manifest'])) {
-                    @unlink($uploadPath . $permohonan['file_bc_manifest']);
-                }
-
-                $newName = $bcFile->getRandomName();
-                $bcFile->move($uploadPath, $newName);
-                $update_data['file_bc_manifest'] = $newName;
             }
 
             $this->db->table('user_permohonan')->where('id', $id_permohonan)->update($update_data);
@@ -1161,12 +1156,14 @@ class Admin extends BaseController
                 ];
                 
                 $skFile = $this->request->getFile('file_sk_petugas');
-                if ($skFile && $skFile->isValid() && !$skFile->hasMoved()) {
-                    $uploadPath = FCPATH . 'uploads/sk_kuota/';
-                    if (!is_dir($uploadPath)) { @mkdir($uploadPath, 0777, true); }
-                    $newName = $skFile->getRandomName();
-                    $skFile->move($uploadPath, $newName);
-                    $update_data['file_sk_petugas'] = $newName;
+                if ($skFile && $skFile->isValid()) {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($skFile);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $update_data['file_sk_petugas'] = $uploadResult['data']['keyFile']; // Simpan keyFile
+                    } else {
+                         throw new \Exception($uploadResult['message'] ?? 'Gagal mengunggah file SK Petugas.');
+                    }
                 }
 
                 $this->db->table('user_pengajuan_kuota')->where('id', $id_pengajuan)->update($update_data);
@@ -1283,16 +1280,10 @@ class Admin extends BaseController
         $pengajuan = $this->db->table('user_pengajuan_kuota')->where('id', $id_pengajuan)->get()->getRowArray();
 
         if ($pengajuan && !empty($pengajuan['file_sk_petugas'])) {
-            $file_path = FCPATH . 'uploads/sk_kuota/' . $pengajuan['file_sk_petugas'];
-
-            if (file_exists($file_path)) {
-                return $this->response->download($file_path, null);
-            } else {
-                session()->setFlashdata('message', '<div class="alert alert-danger" role="alert">File Surat Keputusan tidak ditemukan di server.</div>');
-                return redirect()->to('admin/daftar_pengajuan_kuota');
-            }
+            // $pengajuan['file_sk_petugas'] sekarang berisi keyFile
+            return redirect()->to('admin/downloadFile/' . $pengajuan['file_sk_petugas']);
         } else {
-            session()->setFlashdata('message', '<div class="alert alert-warning" role="alert">Surat Keputusan belum tersedia untuk pengajuan ini.</div>');
+            session()->setFlashdata('message', '<div class="alert alert-warning" role="alert">Surat Keputusan belum tersedia.</div>');
             return redirect()->to('admin/daftar_pengajuan_kuota');
         }
     }
@@ -1399,6 +1390,36 @@ class Admin extends BaseController
         
         error_log("12. View file exists - returning view");
         return view('auth/changepass', $data);
+    }
+
+    public function downloadFile(string $keyFile = '')
+    {
+        if (empty($keyFile)) {
+            throw PageNotFoundException::forPageNotFound('File key tidak valid.');
+        }
+
+        try {
+            $tobaUploader = new TobaUploader();
+            $fileData = $tobaUploader->download($keyFile);
+
+            if ($fileData && $fileData->result === 'success' && isset($fileData->data->base64)) {
+                $binaryData = base64_decode($fileData->data->base64);
+                $mimeType = $fileData->data->type ?? 'application/octet-stream';
+                $fileName = $fileData->data->fileName ?? 'downloaded_file';
+
+                return $this->response
+                    ->setHeader('Content-Type', $mimeType)
+                    ->setHeader('Content-Disposition', 'inline; filename="' . $fileName . '"')
+                    ->setBody($binaryData)
+                    ->send();
+            } else {
+                $errorMessage = $fileData->detail ?? 'File tidak ditemukan di server hosting.';
+                throw PageNotFoundException::forPageNotFound($errorMessage);
+            }
+        } catch (\Exception $e) {
+            log_message('error', '[TobaUploader Download Exception] ' . $e->getMessage());
+            throw PageNotFoundException::forPageNotFound('Gagal memproses download.');
+        }
     }
 
 }

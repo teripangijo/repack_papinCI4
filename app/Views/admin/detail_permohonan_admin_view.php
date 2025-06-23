@@ -90,8 +90,9 @@
                                 <tr>
                                     <td>File BC 1.1 / Manifest</td>
                                     <td>:
-                                        <a href="<?= base_url('uploads/bc_manifest/' . htmlspecialchars($permohonan_detail['file_bc_manifest'])); ?>" target="_blank" class="btn btn-sm btn-outline-info" title="Unduh/Lihat File BC 1.1 / Manifest">
-                                            <i class="fas fa-file-download"></i> <?= htmlspecialchars($permohonan_detail['file_bc_manifest']); ?>
+                                        <!-- [DIREVISI] -->
+                                        <a href="<?= site_url('admin/downloadFile/' . $permohonan_detail['file_bc_manifest']); ?>" target="_blank" class="btn btn-sm btn-outline-info" title="Unduh/Lihat File BC 1.1 / Manifest">
+                                            <i class="fas fa-file-download"></i> Lihat File
                                         </a>
                                     </td>
                                 </tr>
@@ -139,7 +140,8 @@
                                 <tr><td>No. Surat Tugas</td><td>: <?= htmlspecialchars($permohonan_detail['NoSuratTugas'] ?? '-'); ?></td></tr>
                                 <tr><td>Tgl. Surat Tugas</td><td>: <?= isset($permohonan_detail['TglSuratTugas']) && $permohonan_detail['TglSuratTugas'] != '0000-00-00' ? date('d M Y', strtotime($permohonan_detail['TglSuratTugas'])) : '-'; ?></td></tr>
                                 <?php if (isset($permohonan_detail['FileSuratTugas']) && !empty($permohonan_detail['FileSuratTugas'])): ?>
-                                    <tr><td>File Surat Tugas</td><td>: <a href="<?= base_url('uploads/surat_tugas/' . htmlspecialchars($permohonan_detail['FileSuratTugas'])); ?>" target="_blank" title="Unduh/Lihat Surat Tugas"><i class="fas fa-file-alt"></i> <?= htmlspecialchars($permohonan_detail['FileSuratTugas']); ?></a></td></tr>
+                                    <!-- [DIREVISI] -->
+                                    <tr><td>File Surat Tugas</td><td>: <a href="<?= site_url('admin/downloadFile/' . $permohonan_detail['FileSuratTugas']); ?>" target="_blank" title="Unduh/Lihat Surat Tugas"><i class="fas fa-file-alt"></i> Lihat File</a></td></tr>
                                 <?php else: ?>
                                     <tr><td>File Surat Tugas</td><td>: <span class="text-muted"><em>Tidak ada file</em></span></td></tr>
                                 <?php endif; ?>
@@ -178,16 +180,18 @@
                                 <tr><td width="40%">Waktu Rekam LHP</td><td>: <?= isset($lhp_detail['submit_time']) && $lhp_detail['submit_time'] != '0000-00-00 00:00:00' ? date('d M Y H:i:s', strtotime($lhp_detail['submit_time'])) : '-'; ?></td></tr>
                                 <tr><td>Catatan LHP</td><td>: <?= !empty($lhp_detail['Catatan']) ? nl2br(htmlspecialchars($lhp_detail['Catatan'])) : '<span class="text-muted"><em>Tidak ada catatan</em></span>'; ?></td></tr>
                                 <?php if (isset($lhp_detail['FileLHP']) && !empty($lhp_detail['FileLHP'])): ?>
-                                    <tr><td>File LHP</td><td>: <a href="<?= base_url('uploads/lhp/' . htmlspecialchars($lhp_detail['FileLHP'])); ?>" target="_blank" title="Unduh/Lihat LHP"><i class="fas fa-file-pdf"></i> <?= htmlspecialchars($lhp_detail['FileLHP']); ?></a></td></tr>
+                                    <!-- [DIREVISI] -->
+                                    <tr><td>File LHP</td><td>: <a href="<?= site_url('admin/downloadFile/' . $lhp_detail['FileLHP']); ?>" target="_blank" title="Unduh/Lihat LHP"><i class="fas fa-file-pdf"></i> Lihat File</a></td></tr>
                                 <?php else: ?>
                                     <tr><td>File LHP</td><td>: <span class="text-muted"><em>Tidak ada file</em></span></td></tr>
                                 <?php endif; ?>
                                 <?php if (isset($lhp_detail['file_dokumentasi_foto']) && !empty($lhp_detail['file_dokumentasi_foto'])): ?>
                                     <tr>
                                         <td>File Dokumentasi Foto</td>
-                                        <td>:
-                                            <a href="<?= base_url('uploads/dokumentasi_lhp/' . htmlspecialchars($lhp_detail['file_dokumentasi_foto'])); ?>" target="_blank" title="Unduh/Lihat Dokumentasi Foto">
-                                                <i class="fas fa-camera"></i> <?= htmlspecialchars($lhp_detail['file_dokumentasi_foto']); ?>
+                                        <td>
+                                            <!-- [DIREVISI] -->
+                                            <a href="<?= site_url('admin/downloadFile/' . $lhp_detail['file_dokumentasi_foto']); ?>" target="_blank" title="Unduh/Lihat Dokumentasi Foto">
+                                                <i class="fas fa-camera"></i> Lihat Foto
                                             </a>
                                         </td>
                                     </tr>
@@ -223,8 +227,9 @@
                                     <tr>
                                         <td>File Surat Persetujuan</td>
                                         <td>:
-                                            <a href="<?= base_url('uploads/sk_penyelesaian/' . htmlspecialchars($permohonan_detail['file_surat_keputusan'])); ?>" target="_blank" class="btn btn-sm btn-success" title="Unduh/Lihat Surat Persetujuan">
-                                                <i class="fas fa-file-download"></i> <?= htmlspecialchars($permohonan_detail['file_surat_keputusan']); ?>
+                                            <!-- [DIREVISI] -->
+                                            <a href="<?= site_url('admin/downloadFile/' . $permohonan_detail['file_surat_keputusan']); ?>" target="_blank" class="btn btn-sm btn-success" title="Unduh/Lihat Surat Persetujuan">
+                                                <i class="fas fa-file-download"></i> Lihat Surat Persetujuan
                                             </a>
                                         </td>
                                     </tr>

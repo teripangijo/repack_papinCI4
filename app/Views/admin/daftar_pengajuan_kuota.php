@@ -8,10 +8,10 @@
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Daftar Pengajuan Kuota'; ?></h1>
-        <?php // No action button here in original ?>
+        <?php ?>
     </div>
 
-    <?php // No flashdata display here in original ?>
+    <?php ?>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -79,8 +79,9 @@
                                                 <i class="fas fa-cogs"></i>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if (!empty($pk['file_sk_petugas']) && (strtolower($pk['status']) == 'approved' || strtolower($pk['status']) == 'rejected')): ?>
-                                            <a href="<?= site_url('admin/download_sk_kuota_admin/' . $pk['id']); ?>" class="btn btn-primary btn-circle btn-sm my-1" title="Unduh SK Petugas">
+                                        <?php if (!empty($pk['file_sk_petugas'])): ?>
+                                            <!-- [DIREVISI] -->
+                                            <a href="<?= site_url('admin/downloadFile/' . $pk['file_sk_petugas']); ?>" target="_blank" class="btn btn-primary btn-circle btn-sm my-1" title="Unduh SK Petugas">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                         <?php endif; ?>
@@ -98,7 +99,6 @@
 </div>
 <script>
 $(document).ready(function() {
-    // Pastikan jQuery dan DataTables sudah dimuat di template footer Anda
     if (typeof $ !== 'undefined' && typeof $.fn.DataTable !== 'undefined') {
         $('#dataTableAdminPengajuanKuota').DataTable({
             "order": [[ 8, "desc" ]], // Urutkan berdasarkan Tgl Submit Sistem terbaru (indeks kolom ke-8 dari 0)

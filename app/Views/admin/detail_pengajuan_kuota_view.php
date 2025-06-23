@@ -53,7 +53,8 @@
                          <?php if (!empty($pengajuan['file_lampiran_user'])): ?>
                         <tr>
                             <th>Lampiran User</th>
-                            <td>: <a href="<?= base_url('user/download_lampiran_kuota/' . $pengajuan['id']); ?>" target="_blank"><?= htmlspecialchars($pengajuan['file_lampiran_user']); ?></a></td>
+                            <!-- [DIREVISI] -->
+                            <td>: <a href="<?= site_url('admin/downloadFile/' . $pengajuan['file_lampiran_user']); ?>" target="_blank">Lihat Lampiran</a></td>
                         </tr>
                         <?php endif; ?>
                     </table>
@@ -99,7 +100,7 @@
                             <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <tr>
                                 <th>File SK Petugas</th>
-                                <td>: <a href="<?= base_url('admin/download_sk_kuota_admin/' . $pengajuan['id']); ?>" target="_blank"><?= htmlspecialchars($pengajuan['file_sk_petugas']); ?></a></td>
+                                <td>: <a href="<?= site_url('admin/downloadFile/' . $pengajuan['file_sk_petugas']); ?>" target="_blank">Lihat File SK</a></td>
                             </tr>
                             <?php endif; ?>
                         <?php endif; ?>

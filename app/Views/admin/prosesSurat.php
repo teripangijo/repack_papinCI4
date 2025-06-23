@@ -170,8 +170,9 @@
                         <label class="small mb-1" for="file_surat_keputusan">Upload File Surat Persetujuan Pengeluaran <span id="surat_keputusan_wajib_text" class="text-danger">*</span> <span class="text-info small">(Max 2MB: PDF, JPG, PNG)</span></label>
                         <?php if(!empty($permohonan['file_surat_keputusan'])): ?>
                             <p class="small mb-1">File saat ini:
-                                <a href="<?= base_url('uploads/sk_penyelesaian/' . htmlspecialchars($permohonan['file_surat_keputusan'])); ?>" target="_blank">
-                                    <i class="fas fa-file-alt"></i> <?= htmlspecialchars($permohonan['file_surat_keputusan']); ?>
+                                <!-- [DIREVISI] -->
+                                <a href="<?= site_url('admin/downloadFile/' . $permohonan['file_surat_keputusan']); ?>" target="_blank">
+                                    <i class="fas fa-file-alt"></i> Lihat File Saat Ini
                                 </a>
                                 (Upload file baru di bawah akan menggantikan file ini)
                             </p>
@@ -218,31 +219,29 @@ $(document).ready(function() {
         format: 'yyyy-mm-dd',
         autoclose: true,
         todayHighlight: true,
-        uiLibrary: 'bootstrap4' // Jika Anda menggunakan Gijgo Datepicker
+        uiLibrary: 'bootstrap4'
     });
 
-    // Logika untuk menampilkan/menyembunyikan field berdasarkan status final
     function toggleFinalFields() {
         var statusFinal = $('input[name="status_final"]:checked').val();
         if (statusFinal === '4') { // Ditolak
             $('#catatan_penolakan_box').show();
-            $('#upload_surat_persetujuan_box').hide(); // Sembunyikan upload SK jika ditolak
-            $('#surat_keputusan_wajib_text').hide(); // Sembunyikan tanda bintang
-            $('#file_surat_keputusan').removeAttr('required'); // Hapus atribut required HTML5
-        } else if (statusFinal === '3') { // Disetujui
+            $('#upload_surat_persetujuan_box').hide();
+            $('#surat_keputusan_wajib_text').hide();
+            $('#file_surat_keputusan').removeAttr('required');
+        } else if (statusFinal === '3') {
             $('#catatan_penolakan_box').hide();
             $('#upload_surat_persetujuan_box').show();
-            $('#surat_keputusan_wajib_text').show(); // Tampilkan tanda bintang
+            $('#surat_keputusan_wajib_text').show();
             <?php if(empty($permohonan['file_surat_keputusan'])): ?>
-                // Hanya tambahkan 'required' jika belum ada file lama dan status disetujui
                 $('#file_surat_keputusan').attr('required', 'required');
             <?php else: ?>
-                $('#file_surat_keputusan').removeAttr('required'); // Jika sudah ada file lama, tidak wajib upload baru
+                $('#file_surat_keputusan').removeAttr('required');
             <?php endif; ?>
-        } else { // Default atau status lainnya
+        } else { 
             $('#catatan_penolakan_box').hide();
-            $('#upload_surat_persetujuan_box').show(); // Default tampil
-            $('#surat_keputusan_wajib_text').show(); // Default tampil
+            $('#upload_surat_persetujuan_box').show(); 
+            $('#surat_keputusan_wajib_text').show();
              <?php if(empty($permohonan['file_surat_keputusan'])): ?>
                 $('#file_surat_keputusan').attr('required', 'required');
             <?php else: ?>
@@ -251,15 +250,12 @@ $(document).ready(function() {
         }
     }
 
-    // Panggil saat halaman load
     toggleFinalFields();
 
-    // Panggil saat radio button status_final berubah
     $('input[name="status_final"]').on('change', function() {
         toggleFinalFields();
     });
 
-    // Untuk menampilkan nama file pada custom file input Bootstrap
     $('#file_surat_keputusan').on('change', function() {
         let fileName = $(this).val().split('\\').pop();
         $(this).next('.custom-file-label').addClass("selected").html(fileName || "Pilih file...");

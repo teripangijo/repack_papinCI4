@@ -63,8 +63,9 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
                     <p><strong>Tanggal Pengajuan Sistem:</strong> <?= isset($pengajuan['submission_date']) ? date('d M Y H:i:s', strtotime($pengajuan['submission_date'])) : 'N/A'; ?></p>
                      <?php if (!empty($pengajuan['file_lampiran_user'])): ?>
                         <p><strong>File Lampiran User:</strong>
-                            <a href="<?= base_url('uploads/lampiran_kuota/' . $pengajuan['file_lampiran_user']); ?>" target="_blank">
-                                <?= htmlspecialchars($pengajuan['file_lampiran_user']); ?>
+                            <!-- [DIREVISI] -->
+                            <a href="<?= site_url('admin/downloadFile/' . $pengajuan['file_lampiran_user']); ?>" target="_blank">
+                                Lihat Lampiran
                             </a>
                         </p>
                     <?php endif; ?>
@@ -109,13 +110,14 @@ $nama_barang_diajukan = isset($pengajuan['nama_barang_kuota']) ? htmlspecialchar
                         <label for="file_sk_petugas">Upload File SK Petugas (.pdf, .jpg, .png, .jpeg maks 2MB) <span id="file_sk_petugas_label_required" class="text-danger" style="display:none;">*</span></label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input <?= $validation->hasError('file_sk_petugas') ? 'is-invalid' : '' ?>" id="file_sk_petugas" name="file_sk_petugas" accept=".pdf,.jpg,.png,.jpeg">
-                            <label class="custom-file-label" for="file_sk_petugas"><?= !empty($pengajuan['file_sk_petugas']) ? htmlspecialchars($pengajuan['file_sk_petugas']) : 'Pilih file SK...'; ?></label>
+                            <label class="custom-file-label" for="file_sk_petugas">Pilih file SK...</label>
                             <div class="invalid-feedback"><?= $validation->getError('file_sk_petugas') ?></div>
                         </div>
                         <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <small class="form-text text-info">File SK saat ini:
-                                <a href="<?= base_url('admin/download_sk_kuota_admin/' . $pengajuan['id']); ?>" target="_blank">
-                                    <?= htmlspecialchars($pengajuan['file_sk_petugas']); ?>
+                                <!-- [DIREVISI] -->
+                                <a href="<?= site_url('admin/downloadFile/' . $pengajuan['file_sk_petugas']); ?>" target="_blank">
+                                    Lihat File SK Saat Ini
                                 </a>. Upload file baru akan menggantikannya.
                             </small>
                         <?php endif; ?>
@@ -145,35 +147,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileSkPetugasLabelRequired = document.getElementById('file_sk_petugas_label_required');
     const approvedQuotaInput = document.getElementById('approved_quota');
     const nomorSkInput = document.getElementById('nomor_sk_petugas');
-    const tanggalSkInput = document.getElementById('tanggal_sk_petugas'); // Input Tanggal SK BARU
+    const tanggalSkInput = document.getElementById('tanggal_sk_petugas');
 
     function toggleApprovedFields() {
         if (statusPengajuanDropdown.value === 'approved') {
             approvedFieldsDiv.style.display = 'block';
             approvedQuotaInput.setAttribute('required', 'required');
             nomorSkInput.setAttribute('required', 'required');
-            tanggalSkInput.setAttribute('required', 'required'); // Tanggal SK juga wajib jika approved
+            tanggalSkInput.setAttribute('required', 'required');
 
             <?php if (empty($pengajuan['file_sk_petugas'])): ?>
                 fileSkPetugasLabelRequired.style.display = 'inline';
-                // document.getElementById('file_sk_petugas').setAttribute('required', 'required'); // Can be added if SK file is mandatory for new approval
             <?php else: ?>
                 fileSkPetugasLabelRequired.style.display = 'none';
-                // document.getElementById('file_sk_petugas').removeAttribute('required');
             <?php endif; ?>
         } else {
             approvedFieldsDiv.style.display = 'none';
             fileSkPetugasLabelRequired.style.display = 'none';
             approvedQuotaInput.removeAttribute('required');
             nomorSkInput.removeAttribute('required');
-            tanggalSkInput.removeAttribute('required'); // Remove required if not approved
-            // document.getElementById('file_sk_petugas').removeAttribute('required');
+            tanggalSkInput.removeAttribute('required');
         }
     }
     toggleApprovedFields(); // Call on load
     statusPengajuanDropdown.addEventListener('change', toggleApprovedFields);
 
-    // Script for Bootstrap custom file input
     var fileInputs = document.querySelectorAll('.custom-file-input');
     Array.prototype.forEach.call(fileInputs, function(input) {
         var label = input.nextElementSibling;
@@ -188,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Initialize Gijgo Datepicker for Officer's SK Date
 $(document).ready(function () {
     if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
         $('#tanggal_sk_petugas.gj-datepicker').datepicker({ // Target with gj-datepicker class
@@ -207,11 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (a_submitButton && a_theForm) {
         a_submitButton.addEventListener('click', function() {
-            // Nonaktifkan tombol untuk mencegah klik ganda
             a_submitButton.disabled = true;
             a_submitButton.innerHTML = 'Menyimpan...';
 
-            // Kirim form secara paksa menggunakan JavaScript
             a_theForm.submit();
         });
     }

@@ -2,5 +2,5 @@ projectKey=repack_papinci4_3
 serverUrl=http://localhost:9000
 serverVersion=25.6.0.109173
 dashboardUrl=http://localhost:9000/dashboard?id=repack_papinci4_3
-ceTaskId=3985adb6-49c4-45e3-b0dd-8e95f96e39e8
-ceTaskUrl=http://localhost:9000/api/ce/task?id=3985adb6-49c4-45e3-b0dd-8e95f96e39e8
+ceTaskId=1e36543d-60dd-45db-98f0-eca47714ee16
+ceTaskUrl=http://localhost:9000/api/ce/task?id=1e36543d-60dd-45db-98f0-eca47714ee16

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use PragmaRX\Google2FA\Google2FA;
+use App\Libraries\TobaUploader;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -15,8 +16,6 @@ class Monitoring extends BaseController
 
     public function __construct()
     {
-        // Pustaka/helper standar dimuat melalui BaseController atau autoload.php
-        // Contoh: helper('url'), session()
         helper(['url', 'repack_helper']);
         $this->session = session();
         $this->db = \Config\Database::connect();
@@ -30,8 +29,6 @@ class Monitoring extends BaseController
             $this->_check_auth_monitoring();
         } elseif (!$this->session->get('email') && $current_method != 'logout') {
             $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Sesi tidak valid atau telah berakhir. Silakan login kembali.</div>');
-            // Redirect response akan ditangani oleh return di method pemanggil
-            // Namun karena ini di constructor, exit lebih aman untuk menghentikan eksekusi
             header('Location: ' . base_url('auth'));
             exit;
         }
@@ -111,24 +108,45 @@ class Monitoring extends BaseController
         return view('monitoring/daftar_pengajuan_kuota_view', $data);
     }
 
-    public function permohonan_impor()
+    public function detail_permohonan_impor($id_permohonan = 0)
     {
-        log_message('debug', 'Monitoring: permohonan_impor() (daftar) called.');
-        $data['title'] = 'Returnable Package';
-        $data['subtitle'] = 'Pantauan Data Permohonan Impor';
-        $data['user'] = $this->db->table('user')->getWhere(['email' => $this->session->get('email')])->getRowArray();
+        log_message('debug', 'Monitoring: detail_permohonan_impor() called with ID: ' . $id_permohonan);
+        if ($id_permohonan == 0 || !is_numeric($id_permohonan)) {
+            $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">ID Permohonan tidak valid.</div>');
+            return redirect()->to('monitoring/permohonan_impor');
+        }
         
+        $data['title'] = 'Returnable Package';
+        $data['subtitle'] = 'Detail Pantauan Permohonan Impor ID: ' . htmlspecialchars($id_permohonan);
+        $data['user'] = $this->db->table('user')->getWhere(['email' => $this->session->get('email')])->getRowArray();
+
         $builder = $this->db->table('user_permohonan up');
-        $builder->select('up.*, upr.NamaPers, u_pemohon.name as nama_pemohon_impor, u_pemohon.email as email_pemohon_impor, u_petugas.name as nama_petugas_pemeriksa');
+        $builder->select(
+            'up.*, '.
+            'upr.NamaPers, upr.npwp AS npwp_perusahaan, upr.alamat AS alamat_perusahaan, upr.NoSkep AS NoSkep_perusahaan_asal, ' .
+            'u_pemohon.name as nama_pengaju_permohonan, u_pemohon.email as email_pengaju_permohonan, '.
+            'p_petugas.NIP as nip_petugas_pemeriksa, u_petugas.name as nama_petugas_pemeriksa'
+        );
         $builder->join('user_perusahaan upr', 'up.id_pers = upr.id_pers', 'left');
         $builder->join('user u_pemohon', 'upr.id_pers = u_pemohon.id', 'left');
         $builder->join('petugas p_petugas', 'up.petugas = p_petugas.id', 'left');
         $builder->join('user u_petugas', 'p_petugas.id_user = u_petugas.id', 'left');
-        $builder->orderBy('up.time_stamp', 'DESC');
-        $data['daftar_permohonan_impor'] = $builder->get()->getResultArray();
-        log_message('debug', 'Monitoring: permohonan_impor() - Query: ' . $this->db->getLastQuery());
+        $builder->where('up.id', $id_permohonan);
+        $data['permohonan_detail'] = $builder->get()->getRowArray();
+        log_message('debug', 'Monitoring: detail_permohonan_impor() - Query: ' . $this->db->getLastQuery());
 
-        return view('monitoring/daftar_permohonan_impor_view', $data);
+        if (!$data['permohonan_detail']) {
+            $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Data permohonan impor tidak ditemukan.</div>');
+            return redirect()->to('monitoring/permohonan_impor');
+        }
+
+        $data['lhp_detail'] = $this->db->table('lhp')->getWhere(['id_permohonan' => $id_permohonan])->getRowArray();
+        
+        // [TAMBAHAN] Menentukan konteks untuk view agar link download benar
+        $data['is_monitoring_view'] = true; 
+        $data['download_url_segment'] = 'monitoring/downloadFile/'; // Memberi tahu view cara membuat link download
+
+        return view('admin/detail_permohonan_admin_view', $data);
     }
 
     public function detail_pengajuan_kuota($id_pengajuan = 0)
@@ -360,5 +378,35 @@ class Monitoring extends BaseController
         $data['user'] = $this->db->table('user')->getWhere(['email' => $this->session->get('email')])->getRowArray();
         
         return view('monitoring/edit_profil_view', $data);
+    }
+
+    public function downloadFile(string $keyFile = '')
+    {
+        if (empty($keyFile)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File key tidak valid.');
+        }
+
+        try {
+            $tobaUploader = new TobaUploader();
+            $fileData = $tobaUploader->download($keyFile);
+
+            if ($fileData && isset($fileData->result) && $fileData->result === 'success' && isset($fileData->data->base64)) {
+                $binaryData = base64_decode($fileData->data->base64);
+                $mimeType = $fileData->data->type ?? 'application/octet-stream';
+                $fileName = $fileData->data->fileName ?? 'downloaded_file';
+
+                return $this->response
+                    ->setHeader('Content-Type', $mimeType)
+                    ->setHeader('Content-Disposition', 'inline; filename="' . $fileName . '"')
+                    ->setBody($binaryData)
+                    ->send();
+            } else {
+                $errorMessage = $fileData->detail ?? 'File tidak ditemukan di server hosting.';
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound($errorMessage);
+            }
+        } catch (\Exception $e) {
+            log_message('error', '[TobaUploader Download Exception - Monitoring] ' . $e->getMessage());
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Gagal memproses download.');
+        }
     }
 }

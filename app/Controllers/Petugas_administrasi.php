@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 // Import class-class yang diperlukan dari CodeIgniter 4 dan library eksternal
 use App\Controllers\BaseController;
+use App\Libraries\TobaUploader;
 use Config\Services;
 use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
@@ -197,51 +198,41 @@ class Petugas_administrasi extends BaseController
                     $this->session->set('email', $update_data_user['email']);
                 }
             }
-
+            
             $profile_image_file = $this->request->getFile('profile_image');
 
             if ($profile_image_file && $profile_image_file->isValid() && !$profile_image_file->hasMoved()) {
-                $upload_dir_profile = WRITEPATH . 'uploads/profile_images/';
-                if (!is_dir($upload_dir_profile)) {
-                    mkdir($upload_dir_profile, 0777, true);
-                }
-
-                // CI4 validation for uploaded files
-                $validation_rules = [
+                // Validasi file tetap dilakukan sebelum upload
+                 $validation_rules = [
                     'profile_image' => [
-                        'label' => 'Profile Image',
-                        'rules' => 'uploaded[profile_image]'
-                            . '|is_image[profile_image]'
-                            . '|mime_in[profile_image,image/jpg,image/jpeg,image/gif,image/png]'
-                            . '|max_size[profile_image,2048]'
-                            . '|max_dims[profile_image,1024,1024]',
+                        'rules' => 'uploaded[profile_image]|is_image[profile_image]|max_size[profile_image,2048]',
                     ],
                 ];
-
                 if ($this->validate($validation_rules)) {
-                    $old_image = $data['user']['image'];
-                    if ($old_image != 'default.jpg' && !empty($old_image) && file_exists($upload_dir_profile . $old_image)) {
-                        @unlink($upload_dir_profile . $old_image);
-                    }
-                    
-                    $new_image_name = $profile_image_file->getRandomName();
-                    $profile_image_file->move($upload_dir_profile, $new_image_name);
+                    try {
+                        $tobaUploader = new TobaUploader();
+                        $uploadResult = $tobaUploader->upload($profile_image_file);
 
-                    $this->db->table('user')->where('id', $user_id)->update(['image' => $new_image_name]);
-                    $this->session->set('user_image', $new_image_name);
-                    
-                    $current_flash = $this->session->getFlashdata('message') ?? '';
-                    $this->session->setFlashdata('message', $current_flash . '<div class="alert alert-success" role="alert">Foto profil berhasil diupdate.</div>');
+                        if ($uploadResult && isset($uploadResult['status']) && $uploadResult['status'] === 'success') {
+                            $newFileKey = $uploadResult['data']['keyFile']; 
+
+                            $this->db->table('user')->where('id', $user_id)->update(['image' => $newFileKey]);
+                            $this->session->set('user_image', $newFileKey);
+                            $this->session->setFlashdata('message', '<div class="alert alert-success" role="alert">Foto profil berhasil diupdate.</div>');
+                        } else {
+                            $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal upload ke Toba: '.($uploadResult['message'] ?? 'Error tidak diketahui').'</div>');
+                        }
+                    } catch (\Exception $e) {
+                        log_message('error', '[TobaUploader Exception] ' . $e->getMessage());
+                        $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal memproses upload: ' . $e->getMessage() . '</div>');
+                    }
                 } else {
-                    $current_flash = $this->session->getFlashdata('message') ?? '';
-                    $this->session->setFlashdata('message', $current_flash . '<div class="alert alert-danger" role="alert">Upload Foto Profil Gagal: ' . $this->validation->getError('profile_image') . '</div>');
+                    $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Upload Foto Profil Gagal: ' . $this->validation->getError('profile_image') . '</div>');
                 }
             }
             
             return redirect()->to('petugas_administrasi/edit_profil');
         }
-
-        // Refresh data user setelah update
         $data['user'] = $this->db->table('user')->getWhere(['email' => $this->session->get('email')])->getRowArray();
         return view('petugas_administrasi/form_edit_profil_admin', $data);
     }
@@ -419,25 +410,23 @@ class Petugas_administrasi extends BaseController
             ];
 
             $file_sk = $this->request->getFile('file_surat_keputusan');
-            $nama_file_sk_baru = $data['permohonan']['file_surat_keputusan'];
-
-            if ($status_final_permohonan == '3' && $file_sk && $file_sk->isValid() && !$file_sk->hasMoved()) {
-                $upload_dir_sk = WRITEPATH . 'uploads/sk_penyelesaian/';
-                if (!$this->_ensureUploadDirExists($upload_dir_sk)) {
-                    $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Konfigurasi direktori upload SK gagal.</div>');
-                    return redirect()->to('petugas_administrasi/prosesSurat/' . $id_permohonan);
+            if ($status_final_permohonan == '3' && $file_sk && $file_sk->isValid()) {
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($file_sk);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        // TO-DO: Hapus file lama di Toba jika ada
+                        $data_update_permohonan['file_surat_keputusan'] = $uploadResult['data']['keyFile'];
+                    } else {
+                        $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal upload file SK: ' . ($uploadResult['message'] ?? 'Error server') . '</div>');
+                        return redirect()->to('petugas_administrasi/prosesSurat/' . $id_permohonan);
+                    }
+                } catch (\Exception $e) {
+                     $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error sistem upload: ' . $e->getMessage() . '</div>');
+                     return redirect()->to('petugas_administrasi/prosesSurat/' . $id_permohonan);
                 }
-
-                if (!empty($data['permohonan']['file_surat_keputusan']) && file_exists($upload_dir_sk . $data['permohonan']['file_surat_keputusan'])) {
-                    @unlink($upload_dir_sk . $data['permohonan']['file_surat_keputusan']);
-                }
-                $nama_file_sk_baru = $file_sk->getRandomName();
-                $file_sk->move($upload_dir_sk, $nama_file_sk_baru);
-                $data_update_permohonan['file_surat_keputusan'] = $nama_file_sk_baru;
-            } elseif ($status_final_permohonan == '4') { // Jika ditolak, hapus file lama
-                 if (!empty($data['permohonan']['file_surat_keputusan']) && file_exists(WRITEPATH . 'uploads/sk_penyelesaian/' . $data['permohonan']['file_surat_keputusan'])) {
-                    @unlink(WRITEPATH . 'uploads/sk_penyelesaian/' . $data['permohonan']['file_surat_keputusan']);
-                }
+            } elseif ($status_final_permohonan == '4') {
+                // TO-DO: Hapus file lama di Toba jika ditolak
                 $data_update_permohonan['file_surat_keputusan'] = null;
             }
 
@@ -567,18 +556,20 @@ class Petugas_administrasi extends BaseController
             $file_st = $this->request->getFile('file_surat_tugas');
             $nama_file_surat_tugas = $permohonan['FileSuratTugas'] ?? null;
 
-            if ($file_st && $file_st->isValid() && !$file_st->hasMoved()) {
-                $upload_dir_st = WRITEPATH . 'uploads/surat_tugas/';
-                if (!$this->_ensureUploadDirExists($upload_dir_st)) {
-                     $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal membuat atau mengakses direktori upload Surat Tugas.</div>');
+            if ($file_st && $file_st->isValid()) {
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($file_st);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $update_data['FileSuratTugas'] = $uploadResult['data']['keyFile'];
+                    } else {
+                         $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal upload surat tugas: ' . ($uploadResult['message'] ?? 'Error server') . '</div>');
+                         return redirect()->to('petugas_administrasi/penunjukanPetugas/' . $id_permohonan);
+                    }
+                } catch (\Exception $e) {
+                     $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error sistem upload: ' . $e->getMessage() . '</div>');
                      return redirect()->to('petugas_administrasi/penunjukanPetugas/' . $id_permohonan);
                 }
-                
-                if (!empty($permohonan['FileSuratTugas']) && file_exists($upload_dir_st . $permohonan['FileSuratTugas'])) {
-                   @unlink($upload_dir_st . $permohonan['FileSuratTugas']);
-                }
-                $nama_file_surat_tugas = $file_st->getRandomName();
-                $file_st->move($upload_dir_st, $nama_file_surat_tugas);
             }
             $update_data['FileSuratTugas'] = $nama_file_surat_tugas;
 
@@ -666,18 +657,20 @@ class Petugas_administrasi extends BaseController
             $file_sk_upload = $this->request->getFile('file_sk_petugas');
             $nama_file_sk = $data['pengajuan']['file_sk_petugas'] ?? null;
 
-            if ($file_sk_upload && $file_sk_upload->isValid() && !$file_sk_upload->hasMoved()) {
-                $upload_dir_sk = WRITEPATH . 'uploads/sk_kuota/';
-                if(!$this->_ensureUploadDirExists($upload_dir_sk)) {
-                     $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error: Direktori upload SK Kuota tidak writable.</div>');
+            if ($file_sk_upload && $file_sk_upload->isValid()) {
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($file_sk_upload);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $data_update_pengajuan['file_sk_petugas'] = $uploadResult['data']['keyFile'];
+                    } else {
+                        $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal upload SK Kuota: ' . ($uploadResult['message'] ?? 'Error server') . '</div>');
+                        return redirect()->to('petugas_administrasi/proses_pengajuan_kuota/' . $id_pengajuan);
+                    }
+                } catch (\Exception $e) {
+                     $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error sistem upload: ' . $e->getMessage() . '</div>');
                      return redirect()->to('petugas_administrasi/proses_pengajuan_kuota/' . $id_pengajuan);
                 }
-                
-                if (!empty($data['pengajuan']['file_sk_petugas']) && file_exists($upload_dir_sk . $data['pengajuan']['file_sk_petugas'])) {
-                    @unlink($upload_dir_sk . $data['pengajuan']['file_sk_petugas']);
-                }
-                $nama_file_sk = $file_sk_upload->getRandomName();
-                $file_sk_upload->move($upload_dir_sk, $nama_file_sk);
             }
             $data_update_pengajuan['file_sk_petugas'] = $nama_file_sk;
 
@@ -773,18 +766,9 @@ class Petugas_administrasi extends BaseController
         $pengajuan = $this->db->table('user_pengajuan_kuota')->getWhere(['id' => $id_pengajuan])->getRowArray();
 
         if ($pengajuan && !empty($pengajuan['file_sk_petugas'])) {
-            $file_name = $pengajuan['file_sk_petugas'];
-            $file_path = WRITEPATH . 'uploads/sk_kuota/' . $file_name;
-
-            if (file_exists($file_path)) {
-                return $this->response->download($file_path, null);
-            } else {
-                log_message('error', 'Petugas_administrasi: File SK Kuota tidak ditemukan di path: ' . $file_path . ' untuk id_pengajuan: ' . $id_pengajuan);
-                $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">File Surat Keputusan tidak ditemukan di server.</div>');
-                return redirect()->to('petugas_administrasi/daftar_pengajuan_kuota');
-            }
+            return redirect()->to('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']);
         } else {
-            $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Surat Keputusan belum tersedia untuk pengajuan ini.</div>');
+            $this->session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Surat Keputusan belum tersedia.</div>');
             return redirect()->to('petugas_administrasi/daftar_pengajuan_kuota');
         }
     }
@@ -867,6 +851,8 @@ class Petugas_administrasi extends BaseController
         }
 
         $data['lhp_detail'] = $this->db->table('lhp')->getWhere(['id_permohonan' => $id_permohonan])->getRowArray();
+        $data['download_url_segment'] = 'petugas_administrasi/downloadFile/';
+
         log_message('debug', 'PETUGAS_ADMINISTRASI DETAIL PERMOHONAN - Data LHP: ' . print_r($data['lhp_detail'], true));
 
         return view('petugas_administrasi/detail_permohonan_view', $data);
@@ -986,18 +972,20 @@ class Petugas_administrasi extends BaseController
 
             $nama_file_bc_manifest_update = $permohonan['file_bc_manifest'];
             $file_bc_upload = $this->request->getFile('file_bc_manifest_pa_edit');
-            if ($file_bc_upload && $file_bc_upload->isValid() && !$file_bc_upload->hasMoved()) {
-                $upload_dir = WRITEPATH . 'uploads/bc_manifest/';
-                if(!$this->_ensureUploadDirExists($upload_dir)){
-                    $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Konfigurasi upload file BC gagal.</div>');
+            if ($file_bc_upload && $file_bc_upload->isValid()) {
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($file_bc_upload);
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $nama_file_bc_manifest_update = $uploadResult['data']['keyFile'];
+                    } else {
+                         $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal upload BC Manifest: ' . ($uploadResult['message'] ?? 'Error server') . '</div>');
+                         return redirect()->to('petugas_administrasi/edit_permohonan/' . $id_permohonan);
+                    }
+                } catch (\Exception $e) {
+                    $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Error sistem upload: ' . $e->getMessage() . '</div>');
                     return redirect()->to('petugas_administrasi/edit_permohonan/' . $id_permohonan);
                 }
-
-                if (!empty($permohonan['file_bc_manifest']) && file_exists($upload_dir . $permohonan['file_bc_manifest'])) {
-                    @unlink($upload_dir . $permohonan['file_bc_manifest']);
-                }
-                $nama_file_bc_manifest_update = $file_bc_upload->getRandomName();
-                $file_bc_upload->move($upload_dir, $nama_file_bc_manifest_update);
             }
 
             $data_update = [
@@ -1056,4 +1044,35 @@ class Petugas_administrasi extends BaseController
             return redirect()->to('petugas_administrasi/permohonanMasuk');
         }
     }
+
+    public function downloadFile(string $keyFile = '')
+    {
+        if (empty($keyFile)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File key tidak valid.');
+        }
+
+        try {
+            $tobaUploader = new TobaUploader();
+            $fileData = $tobaUploader->download($keyFile);
+
+            if ($fileData && isset($fileData->result) && $fileData->result === 'success' && isset($fileData->data->base64)) {
+                $binaryData = base64_decode($fileData->data->base64);
+                $mimeType = $fileData->data->type ?? 'application/octet-stream';
+                $fileName = $fileData->data->fileName ?? 'downloaded_file';
+
+                return $this->response
+                    ->setHeader('Content-Type', $mimeType)
+                    ->setHeader('Content-Disposition', 'inline; filename="' . $fileName . '"')
+                    ->setBody($binaryData)
+                    ->send();
+            } else {
+                $errorMessage = $fileData->detail ?? 'File tidak ditemukan di server hosting.';
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound($errorMessage);
+            }
+        } catch (\Exception $e) {
+            log_message('error', '[TobaUploader Download Exception - Petugas Admin] ' . $e->getMessage());
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Gagal memproses download.');
+        }
+    }
+
 }

@@ -37,7 +37,6 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
         </a>
     </div>
 
-    <!-- <?= $validation->listErrors('list') ?> -->
     <!-- Flash Messages (handled by layout) -->
 
     <div class="card shadow mb-4">
@@ -150,22 +149,13 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
                     <label>File BC 1.1 / Manifest Saat Ini:</label>
                     <?php if (!empty($permohonan_edit['file_bc_manifest'])): ?>
                         <p>
-                            <a href="<?= base_url('uploads/bc_manifest/' . esc($permohonan_edit['file_bc_manifest'])) ?>" target="_blank" class="btn btn-sm btn-outline-info">
-                                <i class="fas fa-file-pdf"></i> <?= esc($permohonan_edit['file_bc_manifest']) ?>
+                            <a href="<?= site_url('user/downloadFile/' . esc($permohonan_edit['file_bc_manifest'])) ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-file-pdf"></i> Lihat File
                             </a>
                         </p>
                     <?php else: ?>
                         <p class="text-muted"><em>Tidak ada file BC 1.1 / Manifest yang terlampir sebelumnya.</em></p>
                     <?php endif; ?>
-                </div>
-
-                <div class="form-group">
-                    <label for="file_bc_manifest_edit">Upload File BC 1.1 / Manifest Baru <span class="text-info small">(Kosongkan jika tidak ingin mengganti)</span></label>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input <?= $validation->hasError('file_bc_manifest_edit') ? 'is-invalid' : '' ?>" id="file_bc_manifest_edit" name="file_bc_manifest_edit" accept=".pdf">
-                        <label class="custom-file-label" for="file_bc_manifest_edit">Pilih file baru (PDF)...</label>
-                    </div>
-                    <div class="invalid-feedback d-block mt-1"><?= $validation->getError('file_bc_manifest_edit') ?></div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-user btn-block mt-4" id="submitEditPermohonanBtn">
@@ -262,150 +252,9 @@ document.addEventListener('DOMContentLoaded', function () {
             submitButton.prop('disabled', true).attr('title', 'Jumlah barang harus lebih dari 0.');
         } else if (sisaKuotaMax > 0 && jumlahDimohon <= sisaKuotaMax) {
             submitButton.prop('disabled', false).attr('title', '');
-        } else {<?= $this->section('scripts') ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Inisialisasi Datepicker
-    if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
-        const datepickerConfig = { uiLibrary: 'bootstrap4', format: 'yyyy-mm-dd', showOnFocus: true, showRightIcon: true, autoClose: true };
-        $('#TglSurat').datepicker(datepickerConfig);
-        $('#TglKedatangan').datepicker(datepickerConfig);
-        $('#TglBongkar').datepicker(datepickerConfig);
-    }
-
-    // Logika untuk Kuota Barang
-    const kuotaSelect = document.getElementById('id_kuota_barang_selected');
-    const submitBtn = document.getElementById('submitPermohonanBtn');
-    const jumlahInput = document.getElementById('JumlahBarang');
-
-    function updateFormState() {
-        const selectedOption = kuotaSelect.options[kuotaSelect.selectedIndex];
-        const sisaKuota = parseInt(selectedOption.dataset.sisa_kuota) || 0;
-        const skep = selectedOption.dataset.skep || 'SKEP Tidak Tersedia';
-        const namaBarang = selectedOption.dataset.nama_barang || '';
-
-        document.getElementById('sisaKuotaInfo').textContent = 'Sisa kuota untuk barang (' + namaBarang + ') ini: ' + sisaKuota.toLocaleString() + ' Unit';
-        document.getElementById('NoSkepOtomatis').value = skep;
-        jumlahInput.setAttribute('max', sisaKuota);
-        document.getElementById('NamaBarangHidden').value = namaBarang;
-        
-        if (sisaKuota <= 0 || kuotaSelect.value === "") {
-            submitBtn.disabled = true;
-            submitBtn.title = 'Tidak ada kuota tersedia atau barang belum dipilih.';
-            jumlahInput.value = 0;
-            jumlahInput.readOnly = true;
         } else {
-            submitBtn.disabled = false;
-            submitBtn.title = '';
-            jumlahInput.readOnly = false;
-        }
-    }
-
-    if(kuotaSelect){
-        kuotaSelect.addEventListener('change', function() {
-            jumlahInput.value = ''; // Reset jumlah on change
-            updateFormState();
-        });
-        updateFormState(); // Initial check
-    }
-    
-    if(jumlahInput){
-        jumlahInput.addEventListener('input', function() {
-            let jumlahDimohon = parseInt(this.value) || 0;
-            const sisaKuotaMax = parseInt(this.getAttribute('max')) || 0;
-            
-            document.querySelector('#sisaKuotaInfo .text-danger')?.remove();
-
-            if (jumlahDimohon > sisaKuotaMax && kuotaSelect.value !== "") {
-                this.value = sisaKuotaMax;
-                document.getElementById('sisaKuotaInfo').insertAdjacentHTML('beforeend', ' <strong class="text-danger">(Jumlah melebihi sisa!)</strong>');
-                jumlahDimohon = sisaKuotaMax;
-            }
-            
-            if(kuotaSelect.value === "") {
-                submitBtn.disabled = true;
-                submitBtn.title = 'Pilih barang berkuota terlebih dahulu.';
-            } else if (jumlahDimohon <= 0) {
-                submitBtn.disabled = true;
-                submitBtn.title = 'Jumlah barang harus lebih dari 0.';
-            } else {
-                submitBtn.disabled = false;
-                submitBtn.title = '';
-            }
-        });
-    }
-    
-    // Logika untuk Label Custom File Input
-    document.querySelectorAll('.custom-file-input').forEach(function(input) {
-        const label = input.nextElementSibling;
-        const originalText = label.innerHTML;
-        input.addEventListener('change', function(e) {
-            const fileName = e.target.files.length > 0 ? e.target.files[0].name : originalText;
-            label.innerHTML = fileName;
-        });
-    });
-
-    // Logika untuk Validasi Dinamis Input Standar
-    function initializeDynamicValidation() {
-        const invalidInputs = document.querySelectorAll('.is-invalid');
-        invalidInputs.forEach(function(input) {
-            const validationHandler = function(event) {
-                const currentInput = event.target;
-                if ((currentInput.type === 'file' && currentInput.files.length > 0) || (currentInput.type !== 'file' && currentInput.value.trim() !== '')) {
-                    currentInput.classList.remove('is-invalid');
-                    let feedbackElement;
-                    if (currentInput.parentElement.classList.contains('custom-file')) {
-                        feedbackElement = currentInput.parentElement.nextElementSibling;
-                    } else {
-                        feedbackElement = currentInput.nextElementSibling;
-                    }
-                    if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
-                        feedbackElement.style.display = 'none';
-                    }
-                    currentInput.removeEventListener('input', validationHandler);
-                    currentInput.removeEventListener('change', validationHandler);
-                }
-            };
-            input.addEventListener('input', validationHandler);
-            input.addEventListener('change', validationHandler);
-        });
-    }
-    initializeDynamicValidation();
-
-    // =================================================================
-    // KODE BARU: PERBAIKAN UNTUK VALIDASI GIJGO DATEPICKER
-    // =================================================================
-    if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
-        // Target semua input yang menggunakan gj-datepicker
-        $('.gj-datepicker').each(function() {
-            var $datepickerInput = $(this);
-            
-            // Dengarkan event 'change' dari plugin Gijgo Datepicker
-            $datepickerInput.on('change', function(e) {
-                var inputElement = e.target;
-                // Jika input sudah memiliki nilai (setelah dipilih)
-                if (inputElement.value) {
-                    // Hapus class 'is-invalid' untuk menghilangkan border merah
-                    $datepickerInput.removeClass('is-invalid');
-                    // Cari elemen .invalid-feedback berikutnya dan sembunyikan
-                    var $feedbackElement = $datepickerInput.next('.invalid-feedback');
-                    if ($feedbackElement.length) {
-                        $feedbackElement.hide();
-                    }
-                }
-            });
-        });
-    }
-});
-</script>
-<?= $this->endSection() ?>
             submitButton.prop('disabled', true).attr('title', 'Tidak ada kuota tersedia atau jumlah tidak valid.');
         }
-    });
-
-    $('#file_bc_manifest_edit').on('change', function() {
-        let fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').addClass("selected").html(fileName);
     });
 });
 </script>

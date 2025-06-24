@@ -30,6 +30,7 @@
                             <th>Tgl Surat</th>
                             <th>Nama Barang</th>
                             <th>Jumlah Diajukan</th>
+                            <th>Lampiran</th> 
                             <th>Tgl Submit</th>
                             <th>Status</th>
                             <th>No. SK</th>
@@ -47,6 +48,15 @@
                                     <td><?= isset($p['tanggal_surat_pengajuan']) && $p['tanggal_surat_pengajuan'] != '0000-00-00' ? esc(date('d/m/Y', strtotime($p['tanggal_surat_pengajuan']))) : '-' ?></td>
                                     <td><?= esc($p['nama_barang_kuota'] ?? '-') ?></td>
                                     <td><?= esc(number_format($p['requested_quota'] ?? 0)) ?></td>
+                                    <td>
+                                        <?php if (!empty($p['file_lampiran_user'])): ?>
+                                            <a href="<?= site_url('user/downloadFile/' . esc($p['file_lampiran_user'])) ?>" target="_blank" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-file-download"></i>
+                                            </a>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= isset($p['submission_date']) && $p['submission_date'] != '0000-00-00 00:00:00' ? esc(date('d/m/Y H:i', strtotime($p['submission_date']))) : '-' ?></td>
                                     <td>
                                         <?php
@@ -91,10 +101,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof $ !== 'undefined' && typeof $.fn.DataTable !== 'undefined') {
         $('#dataTablePengajuanKuotaUser').DataTable({
-            "order": [[ 6, "desc" ]], // Urutkan berdasarkan Tgl Submit terbaru
+            "order": [[ 7, "desc" ]], // Urutkan berdasarkan Tgl Submit terbaru
             "language": { /* sesuaikan bahasa jika perlu */ },
             "columnDefs": [
-                { "orderable": false, "searchable": false, "targets": [0, 10] } // Kolom # dan Action
+                { "orderable": false, "searchable": false, "targets": [0, 6, 11] } // Kolom #, Lampiran dan Action
             ]
         });
     }

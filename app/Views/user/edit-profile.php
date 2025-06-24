@@ -19,7 +19,8 @@ $existing_ttd_file = $user_perusahaan['ttd'] ?? null;
 $existing_skep_fasilitas_file = $user_perusahaan['FileSkepFasilitas'] ?? null;
 
 $current_user_image = $user['image'] ?? 'default.jpg';
-$profileImagePath = base_url('uploads/profile_images/' . esc($current_user_image));
+// [DIREVISI] Menggunakan controller downloadFile untuk menampilkan gambar
+$profileImagePath = ($current_user_image != 'default.jpg' && !empty($current_user_image)) ? site_url('user/downloadFile/' . esc($current_user_image)) : base_url('assets/img/default-avatar.png');
 $fallbackImagePath = base_url('assets/img/default-avatar.png');
 
 // Get validation errors service
@@ -67,7 +68,7 @@ $validation = \Config\Services::validation();
                         <img src="<?= $profileImagePath ?>" onerror="this.onerror=null; this.src='<?= $fallbackImagePath ?>';" class="img-thumbnail mb-2" alt="Logo Perusahaan" style="width: 150px; height: 150px; object-fit: contain;">
                         <div class="custom-file">
                             <input type="file" class="custom-file-input <?= $validation->hasError('profile_image') ? 'is-invalid' : '' ?>" id="profile_image" name="profile_image" accept="image/jpeg,image/png,image/gif">
-                            <label class="custom-file-label text-left" for="profile_image"><?= ($current_user_image != 'default.jpg' && !empty($current_user_image)) ? esc($current_user_image) : 'Ganti Gambar/Logo...' ?></label>
+                            <label class="custom-file-label text-left" for="profile_image"><?= ($current_user_image != 'default.jpg' && !empty($current_user_image)) ? 'Ganti Gambar/Logo...' : 'Pilih Gambar/Logo...' ?></label>
                         </div>
                         <div class="invalid-feedback d-block text-center mt-1">
                             <?= $validation->getError('profile_image') ?>
@@ -137,11 +138,11 @@ $validation = \Config\Services::validation();
                     <label for="file_skep_fasilitas">Upload File SKEP Fasilitas (Opsional, PDF/Gambar maks 2MB)</label>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input <?= $validation->hasError('file_skep_fasilitas') ? 'is-invalid' : '' ?>" id="file_skep_fasilitas" name="file_skep_fasilitas" accept=".pdf,.jpg,.jpeg,.png">
-                        <label class="custom-file-label" for="file_skep_fasilitas"><?= $existing_skep_fasilitas_file ? esc($existing_skep_fasilitas_file) : 'Pilih file SKEP Fasilitas...' ?></label>
+                        <label class="custom-file-label" for="file_skep_fasilitas">Pilih file SKEP Fasilitas...</label>
                     </div>
                     <div class="invalid-feedback d-block mt-1"><?= $validation->getError('file_skep_fasilitas') ?></div>
                     <?php if ($existing_skep_fasilitas_file): ?>
-                        <small class="form-text text-info mt-1">File SKEP Fasilitas saat ini: <a href="<?= base_url('uploads/skep_fasilitas/' . esc($existing_skep_fasilitas_file)) ?>" target="_blank"><?= esc($existing_skep_fasilitas_file) ?></a></small>
+                        <small class="form-text text-info mt-1">File SKEP Fasilitas saat ini: <a href="<?= site_url('user/downloadFile/' . esc($existing_skep_fasilitas_file)) ?>" target="_blank">Lihat File</a></small>
                     <?php endif; ?>
                 </div>
             </div>
@@ -248,12 +249,12 @@ $validation = \Config\Services::validation();
                     </label>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input <?= $validation->hasError('ttd') ? 'is-invalid' : '' ?>" id="ttd" name="ttd" accept="image/jpeg,image/png,application/pdf">
-                        <label class="custom-file-label" for="ttd"><?= $existing_ttd_file ? esc($existing_ttd_file) : 'Pilih file TTD PIC...' ?></label>
+                        <label class="custom-file-label" for="ttd">Pilih file TTD PIC...</label>
                     </div>
                     <div class="invalid-feedback d-block mt-1"><?= $validation->getError('ttd') ?></div>
                     <small class="form-text text-muted">Format: JPG, PNG, PDF. Maksimum ukuran 1MB.</small>
                     <?php if ($existing_ttd_file): ?>
-                        <small class="form-text text-info mt-1">File TTD saat ini: <a href="<?= base_url('uploads/ttd/' . esc($existing_ttd_file)) ?>" target="_blank"><?= esc($existing_ttd_file) ?></a></small>
+                        <small class="form-text text-info mt-1">File TTD saat ini: <a href="<?= site_url('user/downloadFile/' . esc($existing_ttd_file)) ?>" target="_blank">Lihat File</a></small>
                     <?php endif; ?>
                 </div>
             </div>

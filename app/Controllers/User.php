@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\TobaUploader;
 use App\Controllers\BaseController;
 use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
@@ -61,7 +62,7 @@ class User extends BaseController
 
         $user_is_active = $this->session->get('is_active');
         $current_method = $this->request->getUri()->getSegment(2);
-        $allowed_inactive_methods = ['edit', 'logout', 'ganti_password', 'force_change_password_page'];
+        $allowed_inactive_methods = ['edit', 'logout', 'ganti_password', 'force_change_password_page', 'downloadFile'];
 
         if ($user_is_active == 0 && !in_array($current_method, $allowed_inactive_methods)) {
             if (!($this->request->getUri()->getSegment(1) == 'user' && $current_method == 'edit')) {
@@ -175,7 +176,7 @@ class User extends BaseController
     }
     
     /**
-     * Edit profile and company data page and handle form submission.
+     * Edit profile and company data page and handle form submission using TobaUploader.
      */
     public function edit()
     {
@@ -230,37 +231,57 @@ class User extends BaseController
         }
 
         if (!$this->validate($rules)) {
-            $data['upload_error'] = $this->session->getFlashdata('upload_error_detail');
             return view('user/edit-profile', $data);
         } else {
-            $nama_file_ttd = $this->_handle_file_upload('ttd', ['upload_path' => 'uploads/ttd/', 'label' => 'Tanda Tangan PIC'], $data['user_perusahaan']['ttd'] ?? null);
-            if ($nama_file_ttd === false) return redirect()->to('user/edit');
-
-            $nama_file_profile_image = $this->_handle_file_upload('profile_image', ['upload_path' => 'uploads/profile_images/', 'label' => 'Gambar Profil/Logo'], $data['user']['image'] ?? 'default.jpg');
-            if ($nama_file_profile_image === false) return redirect()->to('user/edit');
-
-            $nama_file_skep_fasilitas = $this->_handle_file_upload('file_skep_fasilitas', ['upload_path' => 'uploads/skep_fasilitas/', 'label' => 'File SKEP Fasilitas'], $data['user_perusahaan']['FileSkepFasilitas'] ?? null);
-            if ($nama_file_skep_fasilitas === false) return redirect()->to('user/edit');
-
-            $nama_file_initial_skep = null;
-            if ($is_activating) {
-                $nama_file_initial_skep = $this->_handle_file_upload('initial_skep_file', ['upload_path' => 'uploads/skep_awal_user/', 'label' => 'File SKEP Kuota Awal']);
-                if ($nama_file_initial_skep === false) return redirect()->to('user/edit');
-            }
-
-            if ($nama_file_profile_image !== null && $nama_file_profile_image != ($data['user']['image'] ?? 'default.jpg')) {
-                $this->db->table('user')->where('id', $id_user_login)->update(['image' => $nama_file_profile_image]);
-                $this->session->set('user_image', $nama_file_profile_image);
-            }
-
+            $tobaUploader = new TobaUploader();
             $data_perusahaan = [
-                'NamaPers' => $this->request->getPost('NamaPers'), 'npwp' => $this->request->getPost('npwp'), 'alamat' => $this->request->getPost('alamat'),
-                'telp' => $this->request->getPost('telp'), 'pic' => $this->request->getPost('pic'), 'jabatanPic' => $this->request->getPost('jabatanPic'),
+                'NamaPers' => $this->request->getPost('NamaPers'), 'npwp' => $this->request->getPost('npwp'),
+                'alamat' => $this->request->getPost('alamat'), 'telp' => $this->request->getPost('telp'),
+                'pic' => $this->request->getPost('pic'), 'jabatanPic' => $this->request->getPost('jabatanPic'),
                 'NoSkepFasilitas' => $this->request->getPost('NoSkepFasilitas') ?: null,
             ];
-            if ($nama_file_ttd !== null) $data_perusahaan['ttd'] = $nama_file_ttd;
-            if ($nama_file_skep_fasilitas !== null) $data_perusahaan['FileSkepFasilitas'] = $nama_file_skep_fasilitas;
 
+            try {
+                // Handle upload TTD
+                if ($this->request->getFile('ttd') && $this->request->getFile('ttd')->isValid()) {
+                    $uploadResult = $tobaUploader->upload($this->request->getFile('ttd'));
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $data_perusahaan['ttd'] = $uploadResult['data']['keyFile'];
+                    } else { throw new \Exception('Gagal upload Tanda Tangan PIC: '.($uploadResult['message'] ?? 'Error')); }
+                }
+
+                // Handle upload Gambar Profil/Logo
+                if ($this->request->getFile('profile_image') && $this->request->getFile('profile_image')->isValid()) {
+                    $uploadResult = $tobaUploader->upload($this->request->getFile('profile_image'));
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $this->db->table('user')->where('id', $id_user_login)->update(['image' => $uploadResult['data']['keyFile']]);
+                        $this->session->set('user_image', $uploadResult['data']['keyFile']);
+                    } else { throw new \Exception('Gagal upload Gambar Profil/Logo: '.($uploadResult['message'] ?? 'Error')); }
+                }
+
+                // Handle upload SKEP Fasilitas
+                if ($this->request->getFile('file_skep_fasilitas') && $this->request->getFile('file_skep_fasilitas')->isValid()) {
+                     $uploadResult = $tobaUploader->upload($this->request->getFile('file_skep_fasilitas'));
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $data_perusahaan['FileSkepFasilitas'] = $uploadResult['data']['keyFile'];
+                    } else { throw new \Exception('Gagal upload File SKEP Fasilitas: '.($uploadResult['message'] ?? 'Error')); }
+                }
+                
+                // Handle SKEP Awal hanya saat aktivasi
+                $keyFileInitialSkep = null;
+                if ($is_activating && $this->request->getFile('initial_skep_file') && $this->request->getFile('initial_skep_file')->isValid()) {
+                    $uploadResult = $tobaUploader->upload($this->request->getFile('initial_skep_file'));
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        // Simpan keyFile untuk dimasukkan ke tabel kuota
+                        $keyFileInitialSkep = $uploadResult['data']['keyFile'];
+                    } else { throw new \Exception('Gagal upload File SKEP Kuota Awal: '.($uploadResult['message'] ?? 'Error')); }
+                }
+            } catch (\Exception $e) {
+                $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">' . $e->getMessage() . '</div>');
+                return redirect()->to('user/edit');
+            }
+            
+            // Lanjutkan proses database
             if ($is_activating) {
                 $data_perusahaan['id_pers'] = $id_user_login;
                 $this->db->table('user_perusahaan')->insert($data_perusahaan);
@@ -273,7 +294,8 @@ class User extends BaseController
                     $this->db->table('user_kuota_barang')->insert([
                         'id_pers' => $id_user_login, 'nama_barang' => $initial_nama_barang, 'initial_quota_barang' => $initial_kuota_jumlah,
                         'remaining_quota_barang' => $initial_kuota_jumlah, 'nomor_skep_asal' => $initial_skep_no, 'tanggal_skep_asal' => $this->request->getPost('initial_skep_tgl'),
-                        'status_kuota_barang' => 'active', 'dicatat_oleh_user_id' => $id_user_login, 'waktu_pencatatan' => date('Y-m-d H:i:s')
+                        'status_kuota_barang' => 'active', 'dicatat_oleh_user_id' => $id_user_login, 'waktu_pencatatan' => date('Y-m-d H:i:s'),
+                        'file_skep_asal' => $keyFileInitialSkep, // Simpan keyFile-nya
                     ]);
                 }
 
@@ -287,43 +309,9 @@ class User extends BaseController
             return redirect()->to('user/index');
         }
     }
-    
+
     /**
-     * Handles file upload logic.
-     */
-    private function _handle_file_upload($fieldName, array $uploadConfig, $existingFile = null)
-    {
-        $file = $this->request->getFile($fieldName);
-
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fullUploadPath = FCPATH . $uploadConfig['upload_path'];
-
-            if (!is_dir($fullUploadPath)) {
-                if (!@mkdir($fullUploadPath, 0777, true)) {
-                    log_message('error', 'Gagal membuat direktori upload: ' . $fullUploadPath);
-                    $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal membuat direktori upload.</div>');
-                    return false;
-                }
-            }
-
-            $newName = $file->getRandomName();
-            try {
-                $file->move($fullUploadPath, $newName);
-                if ($existingFile && $existingFile !== 'default.jpg' && file_exists($fullUploadPath . $existingFile)) {
-                    @unlink($fullUploadPath . $existingFile);
-                }
-                return $newName;
-            } catch (\Exception $e) {
-                log_message('error', 'File upload error for ' . $fieldName . ': ' . $e->getMessage());
-                $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal mengunggah file: ' . $e->getMessage() . '</div>');
-                return false;
-            }
-        }
-        return $existingFile;
-    }
-    
-    /**
-     * Form for creating a new import request.
+     * Form for creating a new import request using TobaUploader.
      */
     public function permohonan_impor_kembali()
     {
@@ -372,8 +360,17 @@ class User extends BaseController
                 return redirect()->to('user/permohonan_impor_kembali');
             }
 
-            $nama_file_bc_manifest = $this->_handle_file_upload('file_bc_manifest', ['upload_path' => 'uploads/bc_manifest/', 'label' => 'File BC 1.1']);
-            if ($nama_file_bc_manifest === false) {
+            $nama_file_bc_manifest = null;
+            try {
+                $tobaUploader = new TobaUploader();
+                $uploadResult = $tobaUploader->upload($this->request->getFile('file_bc_manifest'));
+                if ($uploadResult && $uploadResult['status'] === 'success') {
+                    $nama_file_bc_manifest = $uploadResult['data']['keyFile'];
+                } else {
+                    throw new \Exception('Gagal upload File BC 1.1: ' . ($uploadResult['message'] ?? 'Error'));
+                }
+            } catch (\Exception $e) {
+                $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">' . $e->getMessage() . '</div>');
                 return redirect()->to('user/permohonan_impor_kembali');
             }
             
@@ -383,7 +380,7 @@ class User extends BaseController
                 'NegaraAsal' => $this->request->getPost('NegaraAsal'), 'NamaKapal' => $this->request->getPost('NamaKapal'), 'noVoyage' => $this->request->getPost('noVoyage'),
                 'NoSkep' => $kuota_valid_db['nomor_skep_asal'], 'file_bc_manifest' => $nama_file_bc_manifest, 'id_kuota_barang_digunakan' => $id_kuota_barang_dipilih,
                 'TglKedatangan' => $this->request->getPost('TglKedatangan'), 'TglBongkar' => $this->request->getPost('TglBongkar'), 'lokasi' => $this->request->getPost('lokasi'),
-                'id_pers' => $id_user_login, 'time_stamp' => date('Y-m-d H:i:s'), 'status' => '0'
+                'id_pers' => $id_user_login, 'time_stamp' => date('Y-m-d H:i:s'), 'status' => '0',
             ];
             
             $this->db->table('user_permohonan')->insert($data_insert);
@@ -393,7 +390,7 @@ class User extends BaseController
     }
 
     /**
-     * Form for creating a new quota request.
+     * Form for creating a new quota request using TobaUploader.
      */
     public function pengajuan_kuota()
     {
@@ -424,19 +421,24 @@ class User extends BaseController
         if (!$this->validate($rules)) {
             return view('user/pengajuan_kuota_form', $data);
         } else {
-            $nama_file_lampiran = $this->_handle_file_upload('file_lampiran_pengajuan', ['upload_path' => 'uploads/lampiran_kuota/', 'label' => 'File Lampiran']);
-            if ($nama_file_lampiran === false) {
-                return redirect()->to('user/pengajuan_kuota');
-            }
-
             $data_pengajuan = [
                 'id_pers' => $id_user_login, 'nomor_surat_pengajuan' => $this->request->getPost('nomor_surat_pengajuan'),
                 'tanggal_surat_pengajuan' => $this->request->getPost('tanggal_surat_pengajuan'), 'perihal_pengajuan' => $this->request->getPost('perihal_pengajuan'),
                 'nama_barang_kuota' => $this->request->getPost('nama_barang_kuota'), 'requested_quota' => (float)$this->request->getPost('requested_quota'),
                 'reason' => $this->request->getPost('reason'), 'submission_date' => date('Y-m-d H:i:s'), 'status' => 'pending'
             ];
-            if ($nama_file_lampiran !== null) {
-                $data_pengajuan['file_lampiran_user'] = $nama_file_lampiran;
+            
+            if ($this->request->getFile('file_lampiran_pengajuan') && $this->request->getFile('file_lampiran_pengajuan')->isValid()) {
+                try {
+                    $tobaUploader = new TobaUploader();
+                    $uploadResult = $tobaUploader->upload($this->request->getFile('file_lampiran_pengajuan'));
+                    if ($uploadResult && $uploadResult['status'] === 'success') {
+                        $data_pengajuan['file_lampiran_user'] = $uploadResult['data']['keyFile'];
+                    } else { throw new \Exception('Gagal upload Lampiran: '.($uploadResult['message'] ?? 'Error')); }
+                } catch (\Exception $e) {
+                    $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">' . $e->getMessage() . '</div>');
+                    return redirect()->to('user/pengajuan_kuota');
+                }
             }
 
             $this->db->table('user_pengajuan_kuota')->insert($data_pengajuan);
@@ -642,7 +644,7 @@ class User extends BaseController
     }
 
     /**
-     * Delete a specific application.
+     * [DIREVISI] Delete a specific application, removing local unlink().
      */
     public function hapus_permohonan_impor($id_permohonan = 0)
     {
@@ -658,10 +660,9 @@ class User extends BaseController
             return redirect()->to('user/daftarPermohonan');
         }
 
-        $file_bc_manifest_path = FCPATH . 'uploads/bc_manifest/' . $permohonan['file_bc_manifest'];
-        if (!empty($permohonan['file_bc_manifest']) && file_exists($file_bc_manifest_path)) {
-            @unlink($file_bc_manifest_path);
-        }
+        // TO-DO: Panggil API Toba untuk menghapus file jika ada.
+        // Anda akan butuh keyFile dari $permohonan['file_bc_manifest']
+        // Contoh: if(!empty($permohonan['file_bc_manifest'])) { (new TobaUploader())->delete($permohonan['file_bc_manifest']); }
 
         if ($this->db->table('user_permohonan')->where(['id' => $id_permohonan, 'id_pers' => $id_user_login])->delete()) {
             $this->session->setFlashdata('message', '<div class="alert alert-success" role="alert">Permohonan berhasil dihapus.</div>');
@@ -672,7 +673,7 @@ class User extends BaseController
     }
 
     /**
-     * Delete a specific quota application.
+     * Delete a specific quota application, removing local unlink().
      */
     public function hapus_pengajuan_kuota($id_pengajuan = 0)
     {
@@ -688,10 +689,8 @@ class User extends BaseController
             return redirect()->to('user/daftar_pengajuan_kuota');
         }
 
-        $file_lampiran_path = FCPATH . 'uploads/lampiran_kuota/' . $pengajuan['file_lampiran_user'];
-        if (!empty($pengajuan['file_lampiran_user']) && file_exists($file_lampiran_path)) {
-            @unlink($file_lampiran_path);
-        }
+        // TO-DO: Panggil API Toba untuk menghapus file jika ada.
+        // Contoh: if(!empty($pengajuan['file_lampiran_user'])) { (new TobaUploader())->delete($pengajuan['file_lampiran_user']); }
 
         if ($this->db->table('user_pengajuan_kuota')->where(['id' => $id_pengajuan, 'id_pers' => $id_user_login])->delete()) {
             $this->session->setFlashdata('message', '<div class="alert alert-success" role="alert">Pengajuan kuota berhasil dihapus.</div>');
@@ -699,5 +698,38 @@ class User extends BaseController
             $this->session->setFlashdata('message', '<div class="alert alert-danger" role="alert">Gagal menghapus pengajuan kuota.</div>');
         }
         return redirect()->to('user/daftar_pengajuan_kuota');
+    }
+    
+    /**
+     * Proxy untuk men-download file dari Toba
+     */
+    public function downloadFile(string $keyFile = '')
+    {
+        if (empty($keyFile)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File key tidak valid.');
+        }
+
+        try {
+            $tobaUploader = new TobaUploader();
+            $fileData = $tobaUploader->download($keyFile);
+
+            if ($fileData && isset($fileData->result) && $fileData->result === 'success' && isset($fileData->data->base64)) {
+                $binaryData = base64_decode($fileData->data->base64);
+                $mimeType = $fileData->data->type ?? 'application/octet-stream';
+                $fileName = $fileData->data->fileName ?? 'downloaded_file';
+
+                return $this->response
+                    ->setHeader('Content-Type', $mimeType)
+                    ->setHeader('Content-Disposition', 'inline; filename="' . $fileName . '"')
+                    ->setBody($binaryData)
+                    ->send();
+            } else {
+                $errorMessage = $fileData->detail ?? 'File tidak ditemukan di server hosting.';
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound($errorMessage);
+            }
+        } catch (\Exception $e) {
+            log_message('error', '[TobaUploader Download Exception - User] ' . $e->getMessage());
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Gagal memproses download.');
+        }
     }
 }

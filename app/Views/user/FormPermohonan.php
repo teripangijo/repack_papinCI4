@@ -20,7 +20,7 @@ if (!function_exists('dateConvertFullIndonesia')) {
 }
 
 $logo_perusahaan_file = ($user['image'] ?? 'default.jpg') != 'default.jpg' ? $user['image'] : null;
-$ttd_pic_file = $user_perusahaan['ttd'] ?? null;
+$ttd_pic_file = $permohonan['file_ttd_pic_perusahaan'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -72,17 +72,17 @@ $ttd_pic_file = $user_perusahaan['ttd'] ?? null;
         <tr>
             <td style="width: 20%; text-align: center; vertical-align: top;">
                 <?php if ($logo_perusahaan_file) : ?>
-                    <img src="<?= base_url('uploads/profile_images/' . esc($logo_perusahaan_file, 'url')) ?>" alt="Logo Perusahaan" style="max-width: 90px; max-height: 90px; object-fit: contain;">
+                    <img src="<?= site_url('user/downloadFile/' . esc($logo_perusahaan_file, 'url')) ?>" alt="Logo Perusahaan" style="max-width: 90px; max-height: 90px; object-fit: contain;">
                 <?php else: ?>
                     <div style="width:90px; height:90px; border:1px solid #eee; display:flex; align-items:center; justify-content:center; margin:auto; font-size:10px; color: #ccc;">LOGO</div>
                 <?php endif; ?>
             </td>
             <td style="width: 80%; text-align: center; vertical-align: top;">
-                <h3 style="margin:0; font-size: 14pt;"><?= esc(strtoupper($user_perusahaan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></h3>
-                <p style="margin:2px 0; font-size: 10pt;"><?= esc($user_perusahaan['alamat'] ?? 'Alamat Perusahaan') ?></p>
+                <h3 style="margin:0; font-size: 14pt;"><?= esc(strtoupper($permohonan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></h3>
+                <p style="margin:2px 0; font-size: 10pt;"><?= esc($permohonan['alamat_perusahaan'] ?? 'Alamat Perusahaan') ?></p>
                 <p style="margin:2px 0; font-size: 10pt;">
-                    <?php if (!empty($user_perusahaan['telp'])): ?>
-                        Telp: <?= esc($user_perusahaan['telp']) ?>
+                    <?php if (!empty($permohonan['telp_perusahaan'])): ?>
+                        Telp: <?= esc($permohonan['telp_perusahaan']) ?>
                         <?= !empty($user['email']) ? '| Email: ' . esc($user['email']) : '' ?>
                     <?php elseif (!empty($user['email'])): ?>
                         Email: <?= esc($user['email']) ?>
@@ -111,7 +111,7 @@ $ttd_pic_file = $user_perusahaan['ttd'] ?? null;
 
     <p>Dengan hormat,</p>
     <p class="text-indent-50">
-        Sehubungan dengan kegiatan impor kembali kemasan yang digunakan berulang (Returnable Package) yang sebelumnya telah diekspor oleh perusahaan kami, dengan ini PT. <?= esc($user_perusahaan['NamaPers'] ?? '[Nama Perusahaan]') ?> mengajukan permohonan untuk melakukan impor kembali atas returnable package tersebut, dengan rincian sebagai berikut:
+        Sehubungan dengan kegiatan impor kembali kemasan yang digunakan berulang (Returnable Package) yang sebelumnya telah diekspor oleh perusahaan kami, dengan ini PT. <?= esc($permohonan['NamaPers'] ?? '[Nama Perusahaan]') ?> mengajukan permohonan untuk melakukan impor kembali atas returnable package tersebut, dengan rincian sebagai berikut:
     </p>
 
     <div class="content-section-title">A. DATA BARANG IMPOR KEMBALI</div>
@@ -136,14 +136,14 @@ $ttd_pic_file = $user_perusahaan['ttd'] ?? null;
 
     <div class="signature-block">
         <p>Hormat Kami,</p>
-        <p>PT. <?= esc(strtoupper($user_perusahaan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></p>
+        <p>PT. <?= esc(strtoupper($permohonan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></p>
         <?php if ($ttd_pic_file) : ?>
-            <img src="<?= base_url('uploads/ttd/' . esc($ttd_pic_file, 'url')) ?>" alt="Tanda Tangan PIC" style="max-height: 50px; margin-top:10px; margin-bottom:10px;">
+            <img src="<?= site_url('user/downloadFile/' . esc($ttd_pic_file, 'url')) ?>" alt="Tanda Tangan PIC" style="max-height: 50px; margin-top:10px; margin-bottom:10px;">
         <?php else : ?>
             <div style="height: 70px;">&nbsp;</div>
         <?php endif; ?>
-        <p style="font-weight: bold; text-decoration: underline; margin-bottom:0;"><?= esc(strtoupper($user_perusahaan['pic'] ?? 'NAMA PIC')) ?></p>
-        <p style="margin-top:0;"><?= esc($user_perusahaan['jabatanPic'] ?? 'Jabatan PIC') ?></p>
+        <p style="font-weight: bold; text-decoration: underline; margin-bottom:0;"><?= esc(strtoupper($permohonan['pic'] ?? 'NAMA PIC')) ?></p>
+        <p style="margin-top:0;"><?= esc($permohonan['jabatanPic'] ?? 'Jabatan PIC') ?></p>
     </div>
     <div class="clear"></div>
 

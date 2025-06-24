@@ -72,8 +72,8 @@
                     <div class="col-md-4"><strong>Jumlah Diajukan:</strong> <?= esc(number_format($permohonan_detail['JumlahBarang'] ?? 0)) ?> <?= esc($permohonan_detail['SatuanBarang'] ?? 'Unit') ?></div>
                     <div class="col-md-4"><strong>File BC 1.1/Manifest Awal:</strong>
                         <?php if (isset($permohonan_detail['file_bc_manifest']) && !empty($permohonan_detail['file_bc_manifest'])): ?>
-                            <a href="<?= base_url('uploads/bc_manifest/' . esc($permohonan_detail['file_bc_manifest'])) ?>" target="_blank" title="Lihat File BC 1.1 / Manifest Awal">
-                                <i class="fas fa-file-alt"></i> <?= esc($permohonan_detail['file_bc_manifest']) ?>
+                            <a href="<?= site_url('user/downloadFile/' . esc($permohonan_detail['file_bc_manifest'])) ?>" target="_blank" title="Lihat File BC 1.1 / Manifest Awal">
+                                <i class="fas fa-file-alt"></i> Lihat File
                             </a>
                         <?php else: ?>
                             <span class="text-muted"><em>Tidak ada</em></span>

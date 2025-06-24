@@ -18,7 +18,7 @@ if (!function_exists('dateConvertFull')) {
 }
 
 $logo_perusahaan_file = ($user['image'] ?? 'default.jpg') != 'default.jpg' ? $user['image'] : null;
-$ttd_pic_file = $user_perusahaan['ttd'] ?? null;
+$ttd_pic_file = $pengajuan['file_ttd_pic'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -60,14 +60,14 @@ $ttd_pic_file = $user_perusahaan['ttd'] ?? null;
         <tr>
             <td style="width: 25%; text-align: center; vertical-align: middle;">
                 <?php if ($logo_perusahaan_file) : ?>
-                    <img src="<?= base_url('uploads/profile_images/' . esc($logo_perusahaan_file, 'url')) ?>" alt="Logo Perusahaan" style="max-width: 100px; max-height: 100px; object-fit: contain;">
+                    <img src="<?= site_url('user/downloadFile/' . esc($logo_perusahaan_file, 'url')) ?>" alt="Logo Perusahaan" style="max-width: 100px; max-height: 100px; object-fit: contain;">
                 <?php else: ?>
                     <div style="width:100px; height:100px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; margin:auto; font-size:10px;">No Logo</div>
                 <?php endif; ?>
             </td>
             <td style="width: 50%; text-align: center; vertical-align: middle;">
-                <h3 style="margin-bottom: 5px;"><?= esc(strtoupper($user_perusahaan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></h3>
-                <h5 style="margin-top: 0; font-weight:normal;"><?= esc($user_perusahaan['alamat'] ?? 'Alamat Perusahaan') ?></h5>
+                <h3 style="margin-bottom: 5px;"><?= esc(strtoupper($pengajuan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></h3>
+                <h5 style="margin-top: 0; font-weight:normal;"><?= esc($pengajuan['alamat_perusahaan'] ?? 'Alamat Perusahaan') ?></h5>
             </td>
             <td style="width: 25%; text-align: center;"></td>
         </tr>
@@ -122,13 +122,13 @@ $ttd_pic_file = $user_perusahaan['ttd'] ?? null;
     <div class="signature-block">
         <p>Hormat Kami,</p>
         <?php if ($ttd_pic_file) : ?>
-            <img src="<?= base_url('uploads/ttd/' . esc($ttd_pic_file, 'url')) ?>" alt="Tanda Tangan PIC" style="max-width: 120px; max-height: 60px; object-fit: contain;">
+            <img src="<?= site_url('user/downloadFile/' . esc($ttd_pic_file, 'url')) ?>" alt="Tanda Tangan PIC" style="max-width: 120px; max-height: 60px; object-fit: contain;">
         <?php else : ?>
             <div style="height: 60px;">&nbsp;</div> 
         <?php endif; ?>
-        <p style="font-weight: bold; text-decoration: underline; margin-bottom:2px;"><?= esc(strtoupper($user_perusahaan['pic'] ?? 'NAMA PIC')) ?></p>
-        <p style="margin-bottom:2px;"><?= esc($user_perusahaan['jabatanPic'] ?? 'Jabatan PIC') ?></p>
-        <p><?= esc($user_perusahaan['NamaPers'] ?? 'Nama Perusahaan') ?></p>
+        <p style="font-weight: bold; text-decoration: underline; margin-bottom:2px;"><?= esc(strtoupper($pengajuan['pic'] ?? 'NAMA PIC')) ?></p>
+        <p style="margin-bottom:2px;"><?= esc($pengajuan['jabatanPic'] ?? 'Jabatan PIC') ?></p>
+        <p><?= esc($pengajuan['NamaPers'] ?? 'Nama Perusahaan') ?></p>
     </div>
     <div class="clear"></div>
 

@@ -86,13 +86,20 @@ class AuthFilter implements FilterInterface
                 }
             }
 
-            // // Logika Force Change Password
-            // if (($user['force_change_password'] ?? 0) == 1) {
-            //     if (!str_contains($currentUri, 'changepass') && $currentUri != 'auth/logout') {
-            //         $session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Anda wajib mengganti password Anda.</div>');
-            //         // ... (logika redirect ganti password)
-            //     }
-            // }
+            // Logika Force Change Password
+            if (($user['force_change_password'] ?? 0) == 1) {
+                if (!str_contains($currentUri, 'changepass') && $currentUri != 'auth/logout') {
+                    $session->setFlashdata('message', '<div class="alert alert-warning" role="alert">Anda wajib mengganti password Anda.</div>');
+                    // Arahkan ke halaman ganti password yang sesuai dengan role
+                    if ($user['role_id'] == 2) {
+                        return redirect()->to(base_url('user/force_change_password_page'));
+                    } elseif ($user['role_id'] == 3) {
+                        return redirect()->to(base_url('petugas/force_change_password_page'));
+                    } elseif ($user['role_id'] == 1) {
+                        return redirect()->to(base_url('admin/changepass'));
+                    }
+                }
+            }
         }
     }
 

@@ -53,11 +53,11 @@ switch ($role_id) {
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                 aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="<?= site_url($profileUrl) ?>">
+                <a class="dropdown-item" href="<?= base_url($profileUrl) ?>">
                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                     Profil Saya
                 </a>
-                <a class="dropdown-item" href="<?= site_url($changepassUrl) ?>">
+                <a class="dropdown-item" href="<?= base_url($changepassUrl) ?>">
                     <i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>
                     Ganti Password
                 </a>

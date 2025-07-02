@@ -27,7 +27,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Formulir Finalisasi Permohonan - ID: <?= esc($permohonan['id'] ?? '') ?></h6>
         </div>
         <div class="card-body">
-            <form action="<?= site_url('petugas_administrasi/prosesSurat/' . ($permohonan['id'] ?? '')) ?>" method="post" enctype="multipart/form-data">
+            <form action="<?= base_url('petugas_administrasi/prosesSurat/' . ($permohonan['id'] ?? '')) ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
             
                 <fieldset class="border p-3 mb-4">
@@ -72,7 +72,7 @@
                         <div class="form-group mb-3">
                             <label class="small mb-1" for="file_surat_keputusan">Upload File Surat Persetujuan <span id="sk_required_text" class="text-danger">*</span> <span class="text-info small">(Max 2MB)</span></label>
                             <?php if(!empty($permohonan['file_surat_keputusan'])): ?>
-                                <p class="small mb-1">File saat ini: <a href="<?= site_url('path/to/download/' . esc($permohonan['file_surat_keputusan'])) ?>" target="_blank"><i class="fas fa-file-alt"></i> <?= esc($permohonan['file_surat_keputusan']) ?></a></p>
+                                <p class="small mb-1">File saat ini: <a href="<?= base_url('path/to/download/' . esc($permohonan['file_surat_keputusan'])) ?>" target="_blank"><i class="fas fa-file-alt"></i> <?= esc($permohonan['file_surat_keputusan']) ?></a></p>
                             <?php endif; ?>
                             <div class="custom-file"><input type="file" class="custom-file-input" id="file_surat_keputusan" name="file_surat_keputusan" accept=".pdf,.jpg,.jpeg,.png"><label class="custom-file-label" for="file_surat_keputusan">Pilih file...</label></div>
                         </div>
@@ -86,7 +86,7 @@
 
                 <hr>
                 <div class="form-group text-right">
-                    <a href="<?= site_url('petugas_administrasi/detail_permohonan_admin/' . $permohonan['id']) ?>" class="btn btn-secondary">Kembali</a>
+                    <a href="<?= base_url('petugas_administrasi/detail_permohonan_admin/' . $permohonan['id']) ?>" class="btn btn-secondary">Kembali</a>
                     <button type="submit" class="btn btn-success">Simpan Keputusan</button>
                 </div>
             </form>

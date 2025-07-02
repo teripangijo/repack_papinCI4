@@ -38,7 +38,7 @@
                         <tr>
                             <td><?= $no++; ?></td>
                             <td>
-                                <a href="<?= site_url('monitoring/detail_kuota_perusahaan/' . $item['id_pers']); ?>" title="Lihat Detail Kuota untuk <?= htmlspecialchars($item['NamaPers'] ?? 'Perusahaan Ini'); ?>">
+                                <a href="<?= base_url('monitoring/detail_kuota_perusahaan/' . $item['id_pers']); ?>" title="Lihat Detail Kuota untuk <?= htmlspecialchars($item['NamaPers'] ?? 'Perusahaan Ini'); ?>">
                                     <?= htmlspecialchars($item['NamaPers'] ?? 'N/A'); ?>
                                 </a>
                             </td>

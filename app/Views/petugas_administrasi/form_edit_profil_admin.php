@@ -17,7 +17,7 @@
                 </div>
             <?php endif; ?>
 
-            <form action="<?= site_url('petugas_administrasi/edit_profil') ?>" method="post" enctype="multipart/form-data">
+            <form action="<?= base_url('petugas_administrasi/edit_profil') ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <div class="form-group row">
                     <label for="login_identifier" class="col-sm-3 col-form-label">Email (Login)</label>
@@ -42,7 +42,7 @@
                     <div class="col-sm-9">
                         <div class="row">
                             <div class="col-sm-3">
-                                <img src="<?= site_url('petugas_administrasi/downloadFile/' . esc($user['image'] ?? 'default.jpg')) ?>" class="img-thumbnail" alt="Profile Image">
+                                <img src="<?= base_url('petugas_administrasi/downloadFile/' . esc($user['image'] ?? 'default.jpg')) ?>" class="img-thumbnail" alt="Profile Image">
                             </div>
                             <div class="col-sm-9">
                                 <div class="custom-file">
@@ -71,7 +71,7 @@
                 <label class="col-sm-3 col-form-label">Keamanan Akun</label>
                 <div class="col-sm-9">
                      <p class="form-text text-muted">Amankan akun Anda dengan lapisan verifikasi tambahan.</p>
-                     <a href="<?= site_url('petugas_administrasi/setup_mfa') ?>" class="btn btn-info">
+                     <a href="<?= base_url('petugas_administrasi/setup_mfa') ?>" class="btn btn-info">
                         <i class="fas fa-shield-alt fa-fw"></i> Atur Multi-Factor Authentication (MFA)
                     </a>
                 </div>

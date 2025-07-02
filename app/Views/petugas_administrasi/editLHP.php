@@ -35,7 +35,7 @@
                 Form LHP
             </div>
             <div class="card-body">
-                <form action="<?= site_url('petugas/editLHP/' . ($permohonan['id'] ?? '')) ?>" method="POST">
+                <form action="<?= base_url('petugas/editLHP/' . ($permohonan['id'] ?? '')) ?>" method="POST">
                     <?= csrf_field() ?>
                     <div class="row">
                         <div class="col">
@@ -191,7 +191,7 @@
                     </div>
                     <br>
                     <button type="submit" class="btn btn-success">Simpan</button>
-                    <a href="<?= site_url("petugas_administrasi/permohonanMasuk") ?>" class="btn btn-secondary">Kembali</a>
+                    <a href="<?= base_url("petugas_administrasi/permohonanMasuk") ?>" class="btn btn-secondary">Kembali</a>
                 </form>
             </div>
         </div>

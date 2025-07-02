@@ -23,7 +23,7 @@
             <p>Nomor Surat Pemohon: <strong><?= esc($permohonan['nomorSurat'] ?? 'N/A') ?></strong></p>
             <hr>
             
-            <form action="<?= site_url('petugas_administrasi/tolak_permohonan_awal/' . ($permohonan['id'] ?? '')) ?>" method="post">
+            <form action="<?= base_url('petugas_administrasi/tolak_permohonan_awal/' . ($permohonan['id'] ?? '')) ?>" method="post">
                 <?= csrf_field() ?>
                 
                 <div class="form-group">
@@ -35,7 +35,7 @@
                 </div>
                 
                 <div class="text-right">
-                    <a href="<?= site_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-secondary">Batal</a>
+                    <a href="<?= base_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-secondary">Batal</a>
                     <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Tolak Permohonan Ini</button>
                 </div>
 

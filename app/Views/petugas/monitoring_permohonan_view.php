@@ -63,7 +63,7 @@
                                     </td>
                                     <td class="text-center">
                                         <?php if(isset($p['id'])): ?>
-                                            <a href="<?= site_url('petugas/detail_monitoring_permohonan/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Permohonan">
+                                            <a href="<?= base_url('petugas/detail_monitoring_permohonan/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Permohonan">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         <?php endif; ?>

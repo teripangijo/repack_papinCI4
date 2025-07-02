@@ -52,11 +52,11 @@
                             <td class="text-right"><?= ($pk['status'] == 'approved' && isset($pk['approved_quota'])) ? number_format($pk['approved_quota'],0,',','.') : '-'; ?></td>
                             <td><?= isset($pk['processed_date']) && $pk['processed_date'] != '0000-00-00 00:00:00' ? date('d/m/Y H:i', strtotime($pk['processed_date'])) : '-'; ?></td>
                             <td class="text-center">
-                                <a href="<?= site_url('monitoring/detail_pengajuan_kuota/' . $pk['id']); ?>" class="btn btn-sm btn-info btn-circle" title="Lihat Detail Pengajuan">
+                                <a href="<?= base_url('monitoring/detail_pengajuan_kuota/' . $pk['id']); ?>" class="btn btn-sm btn-info btn-circle" title="Lihat Detail Pengajuan">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <?php if (!empty($pk['file_sk_petugas'])): ?>
-                                    <a href="<?= site_url('admin/download_sk_kuota_admin/' . $pk['id']); ?>" class="btn btn-sm btn-success btn-circle" title="Unduh SK Penetapan Kuota">
+                                    <a href="<?= base_url('admin/download_sk_kuota_admin/' . $pk['id']); ?>" class="btn btn-sm btn-success btn-circle" title="Unduh SK Penetapan Kuota">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 <?php endif; ?>

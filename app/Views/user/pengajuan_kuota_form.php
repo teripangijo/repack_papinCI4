@@ -12,7 +12,7 @@ $validation = \Config\Services::validation();
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Pengajuan Penambahan Kuota') ?></h1>
-        <a href="<?= site_url('user/daftar_pengajuan_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('user/daftar_pengajuan_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-list fa-sm text-white-50"></i> Lihat Daftar Pengajuan Kuota
         </a>
     </div>
@@ -28,14 +28,14 @@ $validation = \Config\Services::validation();
                 <div class="card-body">
                     <?php if (empty($user_perusahaan)) : ?>
                          <div class="alert alert-danger" role="alert">
-                            Data perusahaan Anda belum lengkap. Tidak dapat mengajukan kuota. Silakan <a href="<?= site_url('user/edit') ?>" class="alert-link">lengkapi profil perusahaan Anda</a> terlebih dahulu.
+                            Data perusahaan Anda belum lengkap. Tidak dapat mengajukan kuota. Silakan <a href="<?= base_url('user/edit') ?>" class="alert-link">lengkapi profil perusahaan Anda</a> terlebih dahulu.
                         </div>
                     <?php elseif (isset($user['is_active']) && $user['is_active'] == 0) : ?>
                         <div class="alert alert-warning" role="alert">
-                            Akun Anda belum aktif. Tidak dapat mengajukan kuota. Mohon <a href="<?= site_url('user/edit') ?>" class="alert-link">lengkapi profil perusahaan Anda</a> jika belum, atau hubungi Administrator.
+                            Akun Anda belum aktif. Tidak dapat mengajukan kuota. Mohon <a href="<?= base_url('user/edit') ?>" class="alert-link">lengkapi profil perusahaan Anda</a> jika belum, atau hubungi Administrator.
                         </div>
                     <?php else: ?>
-                        <form action="<?= site_url('user/pengajuan_kuota') ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <form action="<?= base_url('user/pengajuan_kuota') ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                             <?= csrf_field() ?>
 
                             <div class="alert alert-secondary small">

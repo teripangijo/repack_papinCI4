@@ -31,7 +31,7 @@
             <p>Nomor Surat Pemohon: <strong><?= htmlspecialchars($permohonan['nomorSurat']); ?></strong></p>
             <hr>
 
-            <form action="<?= site_url('admin/tolak_permohonan_awal/' . $permohonan['id']); ?>" method="post">
+            <form action="<?= base_url('admin/tolak_permohonan_awal/' . $permohonan['id']); ?>" method="post">
                 <?= csrf_field(); // CSRF token for CI4 ?>
 
                 <div class="form-group">
@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="text-right">
-                    <a href="<?= site_url('admin/permohonanMasuk'); ?>" class="btn btn-secondary">Batal</a>
+                    <a href="<?= base_url('admin/permohonanMasuk'); ?>" class="btn btn-secondary">Batal</a>
                     <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Tolak Permohonan Ini</button>
                 </div>
 

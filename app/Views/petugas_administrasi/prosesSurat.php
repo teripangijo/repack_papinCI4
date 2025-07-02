@@ -5,7 +5,7 @@
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Proses Finalisasi Permohonan') ?></h1>
-        <a href="<?= site_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Permohonan
         </a>
     </div>
@@ -30,7 +30,7 @@
                         <h6 class="m-0 font-weight-bold text-primary">Formulir Penyelesaian Permohonan ID: <?= esc($permohonan['id']) ?></h6>
                     </div>
                     <div class="card-body">
-                        <form action="<?= site_url('petugas_administrasi/prosesSurat/' . $permohonan['id']) ?>" method="post" enctype="multipart/form-data">
+                        <form action="<?= base_url('petugas_administrasi/prosesSurat/' . $permohonan['id']) ?>" method="post" enctype="multipart/form-data">
                             <?= csrf_field() ?>
 
                             <p><strong>Nama Perusahaan:</strong> <?= esc($permohonan['NamaPers'] ?? 'N/A') ?></p>
@@ -85,7 +85,7 @@
                                     <label for="file_surat_keputusan">Upload File Surat Persetujuan (Opsional)</label>
                                     <?php if (!empty($permohonan['file_surat_keputusan'])): ?>
                                         <small class="form-text text-info d-block mb-2">File saat ini: 
-                                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . $permohonan['file_surat_keputusan']) ?>" target="_blank">Lihat File</a>. 
+                                            <a href="<?= base_url('petugas_administrasi/downloadFile/' . $permohonan['file_surat_keputusan']) ?>" target="_blank">Lihat File</a>. 
                                             Upload baru akan menggantikannya.
                                         </small>
                                     <?php endif; ?>

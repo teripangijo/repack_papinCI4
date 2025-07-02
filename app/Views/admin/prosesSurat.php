@@ -171,7 +171,7 @@
                         <?php if(!empty($permohonan['file_surat_keputusan'])): ?>
                             <p class="small mb-1">File saat ini:
                                 <!-- [DIREVISI] -->
-                                <a href="<?= site_url('admin/downloadFile/' . $permohonan['file_surat_keputusan']); ?>" target="_blank">
+                                <a href="<?= base_url('admin/downloadFile/' . $permohonan['file_surat_keputusan']); ?>" target="_blank">
                                     <i class="fas fa-file-alt"></i> Lihat File Saat Ini
                                 </a>
                                 (Upload file baru di bawah akan menggantikan file ini)

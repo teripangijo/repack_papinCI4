@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= htmlspecialchars($subtitle ?? 'Detail Kuota Perusahaan'); ?></h1>
-        <a href="<?= site_url('monitoring/pantau_kuota_perusahaan'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('monitoring/pantau_kuota_perusahaan'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Pantauan Kuota
         </a>
     </div>
@@ -131,9 +131,9 @@
                                         <?php 
                                         $link_ref = '#'; 
                                         if ($log['tipe_referensi'] == 'permohonan_impor_selesai' && !empty($log['id_referensi_transaksi'])) {
-                                            $link_ref = site_url('monitoring/detail_permohonan_impor/' . $log['id_referensi_transaksi']);
+                                            $link_ref = base_url('monitoring/detail_permohonan_impor/' . $log['id_referensi_transaksi']);
                                         } elseif (($log['tipe_referensi'] == 'pengajuan_kuota_disetujui' || $log['tipe_referensi'] == 'penambahan_kuota_manual') && !empty($log['id_referensi_transaksi'])) {
-                                            $link_ref = site_url('monitoring/detail_pengajuan_kuota/' . $log['id_referensi_transaksi']);
+                                            $link_ref = base_url('monitoring/detail_pengajuan_kuota/' . $log['id_referensi_transaksi']);
                                         }
                                         ?>
                                         <?php if ($link_ref != '#'): ?>

@@ -27,7 +27,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Edit Permohonan Impor Kembali') ?></h1>
-        <a href="<?= site_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Permohonan
         </a>
     </div>
@@ -55,7 +55,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
             </div>
             <hr>
 
-            <form action="<?= site_url('petugas_administrasi/edit_permohonan/' . $permohonan_edit['id']) ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form action="<?= base_url('petugas_administrasi/edit_permohonan/' . $permohonan_edit['id']) ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <?= csrf_field() ?>
             
                 <input type="hidden" name="id_kuota_barang_selected" id="id_kuota_barang_selected" value="<?= old('id_kuota_barang_selected', $id_kuota_barang_saat_ini) ?>">
@@ -122,7 +122,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
                     <label>File BC 1.1 / Manifest Saat Ini:</label>
                     <?php if (!empty($permohonan_edit['file_bc_manifest'])): ?>
                         <p>
-                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . esc($permohonan_edit['file_bc_manifest'])) ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                            <a href="<?= base_url('petugas_administrasi/downloadFile/' . esc($permohonan_edit['file_bc_manifest'])) ?>" target="_blank" class="btn btn-sm btn-outline-info">
                                 <i class="fas fa-file-pdf"></i> Lihat File Saat Ini
                             </a>
                         </p>
@@ -142,7 +142,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
                 <button type="submit" class="btn btn-primary btn-user btn-block mt-4" id="submitEditPermohonanBtn">
                     <i class="fas fa-save fa-fw"></i> Simpan Perubahan Permohonan
                 </button>
-                <a href="<?= site_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-secondary btn-user btn-block mt-2">
+                <a href="<?= base_url('petugas_administrasi/permohonanMasuk') ?>" class="btn btn-secondary btn-user btn-block mt-2">
                     <i class="fas fa-times fa-fw"></i> Batal
                 </a>
             </form>

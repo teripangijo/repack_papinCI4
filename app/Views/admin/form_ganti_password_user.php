@@ -27,7 +27,7 @@
         </div>
         <div class="card-body">
             <?php if (isset($target_user) && $target_user) : ?>
-            <form action="<?= site_url('admin/ganti_password_user/' . $target_user['id']); ?>" method="post">
+            <form action="<?= base_url('admin/ganti_password_user/' . $target_user['id']); ?>" method="post">
                 <?= csrf_field(); // CSRF token for CI4 ?>
                 <div class="form-group">
                     <label for="new_password">Password Baru <span class="text-danger">*</span></label>
@@ -45,11 +45,11 @@
                     <?php endif; ?>
                 </div>
                 <button type="submit" class="btn btn-primary">Simpan Password Baru</button>
-                <a href="<?= site_url('admin/manajemen_user'); ?>" class="btn btn-secondary">Batal</a>
+                <a href="<?= base_url('admin/manajemen_user'); ?>" class="btn btn-secondary">Batal</a>
             </form>
             <?php else: ?>
                 <p class="text-danger">Data target user tidak ditemukan.</p>
-                <a href="<?= site_url('admin/manajemen_user'); ?>" class="btn btn-secondary">Kembali ke Manajemen User</a>
+                <a href="<?= base_url('admin/manajemen_user'); ?>" class="btn btn-secondary">Kembali ke Manajemen User</a>
             <?php endif; ?>
         </div>
     </div>

@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Edit Profil Saya') ?></h1>
-        <a href="<?= site_url('petugas/index') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas/index') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Dashboard Petugas
         </a>
     </div>
@@ -25,7 +25,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">Informasi Profil Petugas</h6>
                 </div>
                 <div class="card-body">
-                    <form action="<?= site_url('petugas/edit_profil') ?>" method="post" enctype="multipart/form-data">
+                    <form action="<?= base_url('petugas/edit_profil') ?>" method="post" enctype="multipart/form-data">
                         <?= csrf_field() ?>
                         <div class="row">
                             <div class="col-md-4 text-center">
@@ -66,7 +66,7 @@
                         <label class="col-sm-3 col-form-label">Keamanan Akun</label>
                         <div class="col-sm-9">
                             <p class="form-text text-muted">Amankan akun Anda dengan lapisan verifikasi tambahan.</p>
-                            <a href="<?= site_url('petugas/setup_mfa') ?>" class="btn btn-info">
+                            <a href="<?= base_url('petugas/setup_mfa') ?>" class="btn btn-info">
                                 <i class="fas fa-shield-alt fa-fw"></i> Atur Multi-Factor Authentication (MFA)
                             </a>
                         </div>
@@ -82,7 +82,7 @@
                 <div class="card-body">
                     <p>Di halaman ini Anda hanya dapat mengubah foto profil Anda.</p>
                     <p>Untuk perubahan data lain seperti Nama, NIP, atau Jabatan, silakan hubungi Administrator.</p>
-                    <p>Anda juga dapat <a href="<?= site_url('auth/changepass') ?>">mengganti password Anda</a> jika diperlukan.</p>
+                    <p>Anda juga dapat <a href="<?= base_url('auth/changepass') ?>">mengganti password Anda</a> jika diperlukan.</p>
                 </div>
             </div>
         </div>

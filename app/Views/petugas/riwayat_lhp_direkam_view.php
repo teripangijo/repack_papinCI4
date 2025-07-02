@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Riwayat LHP Direkam') ?></h1>
-        <a href="<?= site_url('petugas/daftar_pemeriksaan') ?>" class="btn btn-sm btn-info shadow-sm">
+        <a href="<?= base_url('petugas/daftar_pemeriksaan') ?>" class="btn btn-sm btn-info shadow-sm">
             <i class="fas fa-tasks fa-sm text-white-50"></i> Kembali ke Tugas Pemeriksaan
         </a>
     </div>
@@ -63,11 +63,11 @@
                                 ?>
                             </td>
                             <td class="text-center">
-                                <a href="<?= site_url('petugas/detail_lhp_direkam/' . ($lhp_item['id_lhp'] ?? $lhp_item['id'])) ?>" class="btn btn-sm btn-info" title="Lihat Detail LHP">
+                                <a href="<?= base_url('petugas/detail_lhp_direkam/' . ($lhp_item['id_lhp'] ?? $lhp_item['id'])) ?>" class="btn btn-sm btn-info" title="Lihat Detail LHP">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <?php if (isset($lhp_item['status_permohonan_terkini']) && $lhp_item['status_permohonan_terkini'] == '2'): ?>
-                                    <a href="<?= site_url('petugas/rekam_lhp/' . $lhp_item['id_permohonan']) ?>" class="btn btn-sm btn-warning mt-1" title="Edit LHP">
+                                    <a href="<?= base_url('petugas/rekam_lhp/' . $lhp_item['id_permohonan']) ?>" class="btn btn-sm btn-warning mt-1" title="Edit LHP">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 <?php endif; ?>

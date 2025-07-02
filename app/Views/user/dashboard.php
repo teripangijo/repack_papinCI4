@@ -10,7 +10,7 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Dashboard') ?></h1>
         <?php if (isset($user_perusahaan) && !empty($user_perusahaan) && ($user['is_active'] ?? 0) == 1) : ?>
-            <a href="<?= site_url('user/permohonan_impor_kembali') ?>" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <a href="<?= base_url('user/permohonan_impor_kembali') ?>" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                 <i class="fas fa-plus fa-sm text-white-50"></i> Buat Permohonan Impor Kembali
             </a>
         <?php endif; ?>
@@ -23,7 +23,7 @@
             <h4 class="alert-heading">Akun Belum Aktif!</h4>
             <p>Untuk mengaktifkan akun Anda dan mulai menggunakan layanan, mohon lengkapi data profil dan perusahaan Anda.</p>
             <hr>
-            <p class="mb-0"><a href="<?= site_url('user/edit') ?>" class="btn btn-primary">Lengkapi Profil Sekarang</a></p>
+            <p class="mb-0"><a href="<?= base_url('user/edit') ?>" class="btn btn-primary">Lengkapi Profil Sekarang</a></p>
         </div>
     <?php else : ?>
         <div class="row">
@@ -132,7 +132,7 @@
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                         <h6 class="m-0 font-weight-bold text-primary">Ringkasan Permohonan Impor Kembali Terbaru</h6>
-                        <a href="<?= site_url('user/daftarPermohonan') ?>">Lihat Semua Permohonan &rarr;</a>
+                        <a href="<?= base_url('user/daftarPermohonan') ?>">Lihat Semua Permohonan &rarr;</a>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($recent_permohonan)) : ?>

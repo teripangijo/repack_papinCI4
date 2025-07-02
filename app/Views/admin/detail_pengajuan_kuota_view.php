@@ -54,7 +54,7 @@
                         <tr>
                             <th>Lampiran User</th>
                             <!-- [DIREVISI] -->
-                            <td>: <a href="<?= site_url('admin/downloadFile/' . $pengajuan['file_lampiran_user']); ?>" target="_blank">Lihat Lampiran</a></td>
+                            <td>: <a href="<?= base_url('admin/downloadFile/' . $pengajuan['file_lampiran_user']); ?>" target="_blank">Lihat Lampiran</a></td>
                         </tr>
                         <?php endif; ?>
                     </table>
@@ -100,7 +100,7 @@
                             <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <tr>
                                 <th>File SK Petugas</th>
-                                <td>: <a href="<?= site_url('admin/downloadFile/' . $pengajuan['file_sk_petugas']); ?>" target="_blank">Lihat File SK</a></td>
+                                <td>: <a href="<?= base_url('admin/downloadFile/' . $pengajuan['file_sk_petugas']); ?>" target="_blank">Lihat File SK</a></td>
                             </tr>
                             <?php endif; ?>
                         <?php endif; ?>

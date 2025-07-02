@@ -5,10 +5,10 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Detail Pengajuan Kuota') ?></h1>
         <div>
-            <a href="<?= site_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
+            <a href="<?= base_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
                 <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar
             </a>
-            <a href="<?= site_url('petugas_administrasi/print_pengajuan_kuota/' . $pengajuan['id']) ?>" target="_blank" class="btn btn-sm btn-info shadow-sm">
+            <a href="<?= base_url('petugas_administrasi/print_pengajuan_kuota/' . $pengajuan['id']) ?>" target="_blank" class="btn btn-sm btn-info shadow-sm">
                 <i class="fas fa-print fa-sm text-white-50"></i> Cetak Bukti Permohonan User
             </a>
         </div>
@@ -50,7 +50,7 @@
                          <?php if (!empty($pengajuan['file_lampiran_user'])): ?>
                         <tr>
                             <th>Lampiran User</th>
-                            <td>: <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_lampiran_user']) ?>" target="_blank">Lihat Lampiran</a></td>
+                            <td>: <a href="<?= base_url('petugas_administrasi/downloadFile/' . $pengajuan['file_lampiran_user']) ?>" target="_blank">Lihat Lampiran</a></td>
                         </tr>
                         <?php endif; ?>
                     </table>
@@ -96,7 +96,7 @@
                             <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <tr>
                                 <th>File SK Petugas</th>
-                                <td>: <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']) ?>" target="_blank">Lihat File SK</a></td>
+                                <td>: <a href="<?= base_url('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']) ?>" target="_blank">Lihat File SK</a></td>
                             </tr>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -105,11 +105,11 @@
             </div>
             <hr>
              <?php if ($pengajuan['status'] == 'pending' || $pengajuan['status'] == 'diproses'): ?>
-                <a href="<?= site_url('petugas_administrasi/proses_pengajuan_kuota/' . $pengajuan['id']) ?>" class="btn btn-primary">
+                <a href="<?= base_url('petugas_administrasi/proses_pengajuan_kuota/' . $pengajuan['id']) ?>" class="btn btn-primary">
                     <i class="fas fa-edit fa-sm"></i> Proses/Ubah Tindakan
                 </a>
             <?php else: ?>
-                 <a href="<?= site_url('petugas_administrasi/proses_pengajuan_kuota/' . $pengajuan['id']) ?>" class="btn btn-warning">
+                 <a href="<?= base_url('petugas_administrasi/proses_pengajuan_kuota/' . $pengajuan['id']) ?>" class="btn btn-warning">
                     <i class="fas fa-edit fa-sm"></i> Lihat/Revisi Tindakan
                 </a>
             <?php endif; ?>

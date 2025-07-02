@@ -7,7 +7,7 @@ $user_image = $session->get('user_image') ?? 'default.webp'; // Ambil gambar pro
 $uri = service('uri');
 
 // Logika untuk menentukan dashboard link dan teks brand berdasarkan role_id
-$dashboard_link = site_url('/');
+$dashboard_link = base_url('/');
 $brand_super_text = "Guest";
 $icon_class = "fas fa-recycle";
 $current_controller = "auth"; // Default controller
@@ -20,7 +20,7 @@ if ($role_id) {
         case 4: $current_controller = 'monitoring'; $brand_super_text = "Monitoring"; $icon_class = "fas fa-binoculars"; break;
         case 5: $current_controller = 'petugas_administrasi'; $brand_super_text = "Pet. Administrasi"; $icon_class = "fas fa-user-cog"; break;
     }
-    $dashboard_link = site_url($current_controller);
+    $dashboard_link = base_url($current_controller);
 }
 ?>
 <!DOCTYPE html>
@@ -80,21 +80,21 @@ if ($role_id) {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">Manajemen Layanan</div>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['monitoring_kuota', 'histori_kuota_perusahaan']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('admin/monitoring_kuota') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Monitoring Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('admin/monitoring_kuota') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Monitoring Kuota</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['daftar_pengajuan_kuota', 'proses_pengajuan_kuota', 'detailPengajuanKuotaAdmin']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('admin/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-invoice-dollar"></i><span>Pengajuan Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('admin/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-invoice-dollar"></i><span>Pengajuan Kuota</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['permohonanMasuk', 'penunjukanPetugas', 'prosesSurat', 'detail_permohonan_admin']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('admin/permohonanMasuk') ?>"><i class="fas fa-fw fa-file-import"></i><span>Permohonan Impor</span></a>
+                    <a class="nav-link" href="<?= base_url('admin/permohonanMasuk') ?>"><i class="fas fa-fw fa-file-import"></i><span>Permohonan Impor</span></a>
                 </li>
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">Pengaturan Sistem</div>
                 <li class="nav-item <?= ($uri->getSegment(2) == 'manajemen_user') ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('admin/manajemen_user') ?>"><i class="fas fa-fw fa-users-cog"></i><span>Manajemen User</span></a>
+                    <a class="nav-link" href="<?= base_url('admin/manajemen_user') ?>"><i class="fas fa-fw fa-users-cog"></i><span>Manajemen User</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['role', 'roleAccess']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('admin/role') ?>"><i class="fas fa-fw fa-user-tag"></i><span>Manajemen Role</span></a>
+                    <a class="nav-link" href="<?= base_url('admin/role') ?>"><i class="fas fa-fw fa-user-tag"></i><span>Manajemen Role</span></a>
                 </li>
 
             <!-- MENU PENGGUNA JASA (role_id = 2) -->
@@ -102,16 +102,16 @@ if ($role_id) {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">Layanan</div>
                 <li class="nav-item <?= ($uri->getSegment(2) == 'pengajuan_kuota') ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('user/pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-signature"></i><span>Pengajuan Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('user/pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-signature"></i><span>Pengajuan Kuota</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['daftar_pengajuan_kuota', 'print_bukti_pengajuan_kuota']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('user/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-list-alt"></i><span>Daftar Pengajuan Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('user/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-list-alt"></i><span>Daftar Pengajuan Kuota</span></a>
                 </li>
                 <li class="nav-item <?= ($uri->getSegment(2) == 'permohonan_impor_kembali') ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('user/permohonan_impor_kembali') ?>"><i class="fas fa-fw fa-pallet"></i><span>Buat Permohonan Impor</span></a>
+                    <a class="nav-link" href="<?= base_url('user/permohonan_impor_kembali') ?>"><i class="fas fa-fw fa-pallet"></i><span>Buat Permohonan Impor</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['daftarPermohonan', 'editpermohonan', 'printPdf', 'detailPermohonan']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('user/daftarPermohonan') ?>"><i class="fas fa-fw fa-history"></i><span>Daftar Permohonan</span></a>
+                    <a class="nav-link" href="<?= base_url('user/daftarPermohonan') ?>"><i class="fas fa-fw fa-history"></i><span>Daftar Permohonan</span></a>
                 </li>
 
             <!-- MENU PETUGAS (role_id = 3) -->
@@ -119,15 +119,15 @@ if ($role_id) {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">Pemeriksaan</div>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['daftar_pemeriksaan', 'rekam_lhp']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('petugas/daftar_pemeriksaan') ?>"><i class="fas fa-fw fa-tasks"></i><span>Tugas Pemeriksaan</span></a>
+                    <a class="nav-link" href="<?= base_url('petugas/daftar_pemeriksaan') ?>"><i class="fas fa-fw fa-tasks"></i><span>Tugas Pemeriksaan</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['riwayat_lhp_direkam', 'detail_lhp_direkam']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('petugas/riwayat_lhp_direkam') ?>"><i class="fas fa-fw fa-history"></i><span>Riwayat LHP Direkam</span></a>
+                    <a class="nav-link" href="<?= base_url('petugas/riwayat_lhp_direkam') ?>"><i class="fas fa-fw fa-history"></i><span>Riwayat LHP Direkam</span></a>
                 </li>
                 <hr class="sidebar-divider mt-2 mb-2">
                 <div class="sidebar-heading">Pantauan (Petugas)</div>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['monitoring_permohonan', 'detail_monitoring_permohonan']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('petugas/monitoring_permohonan') ?>"><i class="fas fa-fw fa-search-location"></i><span>Monitoring Permohonan</span></a>
+                    <a class="nav-link" href="<?= base_url('petugas/monitoring_permohonan') ?>"><i class="fas fa-fw fa-search-location"></i><span>Monitoring Permohonan</span></a>
                 </li>
 
             <!-- MENU MONITORING (role_id = 4) -->
@@ -135,13 +135,13 @@ if ($role_id) {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">Pantauan Data Utama</div>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['pengajuan_kuota', 'detail_pengajuan_kuota']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('monitoring/pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-contract"></i><span>Pantauan Pengajuan Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('monitoring/pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-contract"></i><span>Pantauan Pengajuan Kuota</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['permohonan_impor', 'detail_permohonan_impor']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('monitoring/permohonan_impor') ?>"><i class="fas fa-fw fa-ship"></i><span>Pantauan Permohonan Impor</span></a>
+                    <a class="nav-link" href="<?= base_url('monitoring/permohonan_impor') ?>"><i class="fas fa-fw fa-ship"></i><span>Pantauan Permohonan Impor</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['pantau_kuota_perusahaan', 'detail_kuota_perusahaan']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('monitoring/pantau_kuota_perusahaan') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Pantauan Kuota Perusahaan</span></a>
+                    <a class="nav-link" href="<?= base_url('monitoring/pantau_kuota_perusahaan') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Pantauan Kuota Perusahaan</span></a>
                 </li>
 
             <!-- MENU PETUGAS ADMINISTRASI (role_id = 5) -->
@@ -149,19 +149,19 @@ if ($role_id) {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">Manajemen Layanan</div>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['monitoring_kuota', 'histori_kuota_perusahaan']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('petugas_administrasi/monitoring_kuota') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Monitoring Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('petugas_administrasi/monitoring_kuota') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Monitoring Kuota</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['daftar_pengajuan_kuota', 'proses_pengajuan_kuota', 'detailPengajuanKuotaAdmin']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('petugas_administrasi/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-invoice-dollar"></i><span>Pengajuan Kuota</span></a>
+                    <a class="nav-link" href="<?= base_url('petugas_administrasi/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-invoice-dollar"></i><span>Pengajuan Kuota</span></a>
                 </li>
                 <li class="nav-item <?= in_array($uri->getSegment(2), ['permohonanMasuk', 'penunjukanPetugas', 'prosesSurat', 'detail_permohonan_admin']) ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('petugas_administrasi/permohonanMasuk') ?>"><i class="fas fa-fw fa-file-import"></i><span>Permohonan Impor</span></a>
+                    <a class="nav-link" href="<?= base_url('petugas_administrasi/permohonanMasuk') ?>"><i class="fas fa-fw fa-file-import"></i><span>Permohonan Impor</span></a>
                 </li>
 
             <?php else: // GUEST atau role tidak dikenal ?>
                 <hr class="sidebar-divider my-0">
                 <li class="nav-item <?= ($uri->getSegment(1) == 'auth' || $uri->getSegment(1) == '') ? 'active' : '' ?>">
-                    <a class="nav-link" href="<?= site_url('auth/login') ?>"><i class="fas fa-fw fa-sign-in-alt"></i><span>Login</span></a>
+                    <a class="nav-link" href="<?= base_url('auth/login') ?>"><i class="fas fa-fw fa-sign-in-alt"></i><span>Login</span></a>
                 </li>
             <?php endif; ?>
 
@@ -170,7 +170,7 @@ if ($role_id) {
                 <div class="sidebar-heading">Akun Saya</div>
                 <?php
                 $edit_profil_method = ($role_id == 2) ? 'edit' : 'edit_profil';
-                $edit_profil_url = site_url($current_controller . '/' . $edit_profil_method);
+                $edit_profil_url = base_url($current_controller . '/' . $edit_profil_method);
                 ?>
                 <li class="nav-item <?= ($uri->getSegment(1) == $current_controller && $uri->getSegment(2) == $edit_profil_method) ? 'active' : '' ?>">
                     <a class="nav-link" href="<?= $edit_profil_url ?>">
@@ -220,12 +220,12 @@ if ($role_id) {
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                                 <?php
                                     $topbar_edit_profil_method = ($role_id == 2) ? 'edit' : 'edit_profil';
-                                    $topbar_edit_profil_url = site_url($current_controller . '/' . $topbar_edit_profil_method);
+                                    $topbar_edit_profil_url = base_url($current_controller . '/' . $topbar_edit_profil_method);
                                 ?>
                                 <a class="dropdown-item" href="<?= $topbar_edit_profil_url ?>">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profile
                                 </a>
-                                <a class="dropdown-item" href="<?= site_url('user/setup_mfa') ?>">
+                                <a class="dropdown-item" href="<?= base_url('user/setup_mfa') ?>">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Settings
                                 </a>
                                 <div class="dropdown-divider"></div>
@@ -287,7 +287,7 @@ if ($role_id) {
                 <div class="modal-body">Pilih "Logout" di bawah ini jika Anda siap untuk mengakhiri sesi Anda saat ini.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <a class="btn btn-primary" href="<?= site_url('auth/logout') ?>">Logout</a>
+                    <a class="btn btn-primary" href="<?= base_url('auth/logout') ?>">Logout</a>
                 </div>
             </div>
         </div>

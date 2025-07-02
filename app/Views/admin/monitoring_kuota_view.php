@@ -60,7 +60,7 @@
                                 <td class="align-middle">
                                     <?php
                                     if (isset($item['id_pers']) && !empty($item['id_pers'])) {
-                                        $link_histori = site_url('admin/histori_kuota_perusahaan/' . $item['id_pers']);
+                                        $link_histori = base_url('admin/histori_kuota_perusahaan/' . $item['id_pers']);
                                         echo '<a href="' . $link_histori . '" title="Lihat Histori Kuota ' . htmlspecialchars($item['NamaPers'] ?? '') . '"><i class="fas fa-eye fa-fw mr-1"></i>' . htmlspecialchars($item['NamaPers'] ?? 'N/A') . '</a>';
                                     } else {
                                         echo htmlspecialchars($item['NamaPers'] ?? 'N/A');

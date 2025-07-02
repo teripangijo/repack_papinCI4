@@ -14,9 +14,9 @@
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Informasi Permohonan</h6>
             <div>
-                <a href="<?= site_url('petugas/monitoring_permohonan') ?>" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left fa-sm"></i> Kembali ke Daftar Monitoring</a>
+                <a href="<?= base_url('petugas/monitoring_permohonan') ?>" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left fa-sm"></i> Kembali ke Daftar Monitoring</a>
                 <?php if (isset($permohonan_detail['id'])): ?>
-                <a href="<?= site_url('user/printPdf/' . $permohonan_detail['id']) ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-print fa-sm"></i> Cetak PDF Permohonan Awal</a>
+                <a href="<?= base_url('user/printPdf/' . $permohonan_detail['id']) ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-print fa-sm"></i> Cetak PDF Permohonan Awal</a>
                 <?php endif; ?>
             </div>
         </div>

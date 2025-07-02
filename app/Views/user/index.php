@@ -80,7 +80,7 @@ $profile_image_path = base_url('uploads/kop/' . esc($profile_image_name, 'url'))
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 class="m-0 font-weight-bold text-primary">Informasi Perusahaan</h6>
-                <a href="<?= site_url('user/edit') ?>" class="btn btn-sm btn-primary shadow-sm"><i class="fas fa-edit fa-sm text-white-50"></i> Edit Profil & Perusahaan</a>
+                <a href="<?= base_url('user/edit') ?>" class="btn btn-sm btn-primary shadow-sm"><i class="fas fa-edit fa-sm text-white-50"></i> Edit Profil & Perusahaan</a>
             </div>
             <div class="card-body">
                 <?php if ($perusahaan_data_exists) : ?>
@@ -129,7 +129,7 @@ $profile_image_path = base_url('uploads/kop/' . esc($profile_image_name, 'url'))
         </div>
     <?php elseif (($user['is_active'] ?? 0) == 0) : ?>
         <div class="alert alert-info" role="alert">
-            Akun Anda belum aktif. Untuk dapat mengajukan permohonan dan melihat detail perusahaan, silakan <a href="<?= site_url('user/edit') ?>" class="alert-link">lengkapi profil perusahaan Anda</a> terlebih dahulu.
+            Akun Anda belum aktif. Untuk dapat mengajukan permohonan dan melihat detail perusahaan, silakan <a href="<?= base_url('user/edit') ?>" class="alert-link">lengkapi profil perusahaan Anda</a> terlebih dahulu.
         </div>
     <?php endif; ?>
 

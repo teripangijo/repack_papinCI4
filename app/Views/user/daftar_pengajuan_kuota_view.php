@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Daftar Pengajuan Kuota Saya') ?></h1>
-        <a href="<?= site_url('user/pengajuan_kuota') ?>" class="btn btn-sm btn-primary shadow-sm">
+        <a href="<?= base_url('user/pengajuan_kuota') ?>" class="btn btn-sm btn-primary shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50"></i> Buat Pengajuan Kuota Baru
         </a>
     </div>
@@ -50,7 +50,7 @@
                                     <td><?= esc(number_format($p['requested_quota'] ?? 0)) ?></td>
                                     <td>
                                         <?php if (!empty($p['file_lampiran_user'])): ?>
-                                            <a href="<?= site_url('user/downloadFile/' . esc($p['file_lampiran_user'])) ?>" target="_blank" class="btn btn-outline-info btn-sm">
+                                            <a href="<?= base_url('user/downloadFile/' . esc($p['file_lampiran_user'])) ?>" target="_blank" class="btn btn-outline-info btn-sm">
                                                 <i class="fas fa-file-download"></i>
                                             </a>
                                         <?php else: ?>
@@ -77,11 +77,11 @@
                                     <td><?= esc($p['nomor_sk_petugas'] ?? '-') ?></td>
                                     <td><?= esc(number_format($p['approved_quota'] ?? 0)) ?></td>
                                     <td class="text-center">
-                                        <a href="<?= site_url('user/print_bukti_pengajuan_kuota/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat/Cetak Bukti Pengajuan">
+                                        <a href="<?= base_url('user/print_bukti_pengajuan_kuota/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat/Cetak Bukti Pengajuan">
                                             <i class="fas fa-print"></i>
                                         </a>
                                         <?php if (isset($p['status']) && strtolower($p['status']) == 'pending'): ?>
-                                            <a href="<?= site_url('user/hapus_pengajuan_kuota/' . $p['id']) ?>" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus Pengajuan Kuota" onclick="return confirm('Apakah Anda yakin ingin menghapus pengajuan kuota untuk barang \'<?= esc($p['nama_barang_kuota']) ?>\' ini?');">
+                                            <a href="<?= base_url('user/hapus_pengajuan_kuota/' . $p['id']) ?>" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus Pengajuan Kuota" onclick="return confirm('Apakah Anda yakin ingin menghapus pengajuan kuota untuk barang \'<?= esc($p['nama_barang_kuota']) ?>\' ini?');">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         <?php endif; ?>

@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= htmlspecialchars($subtitle ?? 'Histori & Detail Kuota Perusahaan'); ?></h1>
-        <a href="<?= site_url('admin/monitoring_kuota'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('admin/monitoring_kuota'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Monitoring Kuota
         </a>
     </div>
@@ -146,7 +146,7 @@ $(document).ready(function() {
 
     // Function to load and display Item Quota Details
     function loadRincianKuota() {
-        var ajaxUrl = "<?= site_url('admin/ajax_get_rincian_kuota_barang/'); ?>" + idPers;
+        var ajaxUrl = "<?= base_url('admin/ajax_get_rincian_kuota_barang/'); ?>" + idPers;
         console.log('Loading rincian kuota from:', ajaxUrl);
 
         if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#dataTableRincianKuotaBarang')) {
@@ -223,7 +223,7 @@ $(document).ready(function() {
 
     // Function to load and display Quota Transaction Log
     function loadLogTransaksi() {
-        var ajaxUrl = "<?= site_url('admin/ajax_get_log_transaksi_kuota/'); ?>" + idPers;
+        var ajaxUrl = "<?= base_url('admin/ajax_get_log_transaksi_kuota/'); ?>" + idPers;
         console.log('Loading log transaksi from:', ajaxUrl);
 
         if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#dataTableHistoriTransaksiKuota')) {
@@ -257,9 +257,9 @@ $(document).ready(function() {
                         if (idRef && log.tipe_referensi) {
                             var tipeRefDisplay = log.tipe_referensi.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                             if (['Pengajuan Kuota', 'Pengajuan Kuota Disetujui'].includes(tipeRefDisplay)) {
-                                linkRef = "<?= site_url('admin/detailPengajuanKuotaAdmin/'); ?>" + idRef;
+                                linkRef = "<?= base_url('admin/detailPengajuanKuotaAdmin/'); ?>" + idRef;
                             } else if (['Permohonan Impor', 'Permohonan Impor Barang', 'Permohonan Impor Selesai'].includes(tipeRefDisplay)) {
-                                linkRef = "<?= site_url('admin/detail_permohonan_admin/'); ?>" + idRef;
+                                linkRef = "<?= base_url('admin/detail_permohonan_admin/'); ?>" + idRef;
                             }
                             refText = '<br><small><a href="' + linkRef + '" ' + (linkRef !== '#' ? 'target="_blank"' : '') + ' title="View reference details">(Ref: ' + tipeRefDisplay + ' ID ' + idRef + (log.id_kuota_barang_referensi ? ' / QuotaItem ID ' + log.id_kuota_barang_referensi : '') + ')</a></small>';
                         }

@@ -13,11 +13,11 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
         <h1 class="h3 mb-0 text-gray-800"><?= htmlspecialchars($subtitle ?? 'Detail Permohonan Impor'); ?></h1>
         <div>
             <?php
-            $url_kembali = site_url('admin/permohonanMasuk');
+            $url_kembali = base_url('admin/permohonanMasuk');
             if (isset($is_monitoring_view) && $is_monitoring_view === TRUE) {
-                $url_kembali = site_url('monitoring/permohonan_impor');
+                $url_kembali = base_url('monitoring/permohonan_impor');
             } elseif (session()->get('role_id') == 2) {
-                 $url_kembali = site_url('user/daftarPermohonan');
+                 $url_kembali = base_url('user/daftarPermohonan');
             }
             ?>
 
@@ -25,15 +25,15 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
             <?php if ((!isset($is_monitoring_view) || $is_monitoring_view !== TRUE) && session()->get('role_id') == 1): ?>
                 <?php if (isset($permohonan_detail['status'])): ?>
                     <?php if ($permohonan_detail['status'] == '0' || $permohonan_detail['status'] == '5'): ?>
-                        <a href="<?= site_url('admin/penunjukanPetugas/' . $permohonan_detail['id']); ?>" class="btn btn-sm btn-success shadow-sm mr-2">
+                        <a href="<?= base_url('admin/penunjukanPetugas/' . $permohonan_detail['id']); ?>" class="btn btn-sm btn-success shadow-sm mr-2">
                             <i class="fas fa-user-plus fa-sm text-white-50"></i> Proses & Tunjuk Petugas
                         </a>
                     <?php elseif ($permohonan_detail['status'] == '1'): ?>
-                        <a href="<?= site_url('admin/penunjukanPetugas/' . $permohonan_detail['id']); ?>" class="btn btn-sm btn-warning shadow-sm mr-2">
+                        <a href="<?= base_url('admin/penunjukanPetugas/' . $permohonan_detail['id']); ?>" class="btn btn-sm btn-warning shadow-sm mr-2">
                             <i class="fas fa-edit fa-sm text-white-50"></i> Lihat/Edit Penunjukan
                         </a>
                     <?php elseif ($permohonan_detail['status'] == '2'): ?>
-                         <a href="<?= site_url('admin/prosesSurat/' . $permohonan_detail['id']); ?>" class="btn btn-sm btn-primary shadow-sm mr-2">
+                         <a href="<?= base_url('admin/prosesSurat/' . $permohonan_detail['id']); ?>" class="btn btn-sm btn-primary shadow-sm mr-2">
                             <i class="fas fa-flag-checkered fa-sm text-white-50"></i> Proses Penyelesaian Akhir
                         </a>
                     <?php endif; ?>
@@ -45,7 +45,7 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
             </a>
             <?php // Print button ?>
             <?php if (isset($permohonan_detail['id'])): ?>
-            <a href="<?= site_url('user/printPdf/' . $permohonan_detail['id']); ?>" target="_blank" class="btn btn-info btn-sm ml-2"><i class="fas fa-print fa-sm"></i> Cetak Form Awal</a>
+            <a href="<?= base_url('user/printPdf/' . $permohonan_detail['id']); ?>" target="_blank" class="btn btn-info btn-sm ml-2"><i class="fas fa-print fa-sm"></i> Cetak Form Awal</a>
             <?php endif; ?>
         </div>
     </div>
@@ -93,7 +93,7 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
                                 <tr>
                                     <td>File BC 1.1 / Manifest</td>
                                     <td>:
-                                        <a href="<?= site_url($download_base_url . $permohonan_detail['file_bc_manifest']); ?>" target="_blank" class="btn btn-sm btn-outline-info" title="Unduh/Lihat File BC 1.1 / Manifest">
+                                        <a href="<?= base_url($download_base_url . $permohonan_detail['file_bc_manifest']); ?>" target="_blank" class="btn btn-sm btn-outline-info" title="Unduh/Lihat File BC 1.1 / Manifest">
                                             <i class="fas fa-file-download"></i> Lihat File
                                         </a>
                                     </td>
@@ -142,7 +142,7 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
                                 <tr><td>No. Surat Tugas</td><td>: <?= htmlspecialchars($permohonan_detail['NoSuratTugas'] ?? '-'); ?></td></tr>
                                 <tr><td>Tgl. Surat Tugas</td><td>: <?= isset($permohonan_detail['TglSuratTugas']) && $permohonan_detail['TglSuratTugas'] != '0000-00-00' ? date('d M Y', strtotime($permohonan_detail['TglSuratTugas'])) : '-'; ?></td></tr>
                                 <?php if (isset($permohonan_detail['FileSuratTugas']) && !empty($permohonan_detail['FileSuratTugas'])): ?>
-                                    <tr><td>File Surat Tugas</td><td>: <a href="<?= site_url($download_base_url . $permohonan_detail['FileSuratTugas']); ?>" target="_blank" title="Unduh/Lihat Surat Tugas"><i class="fas fa-file-alt"></i> Lihat File</a></td></tr>
+                                    <tr><td>File Surat Tugas</td><td>: <a href="<?= base_url($download_base_url . $permohonan_detail['FileSuratTugas']); ?>" target="_blank" title="Unduh/Lihat Surat Tugas"><i class="fas fa-file-alt"></i> Lihat File</a></td></tr>
                                 <?php else: ?>
                                     <tr><td>File Surat Tugas</td><td>: <span class="text-muted"><em>Tidak ada file</em></span></td></tr>
                                 <?php endif; ?>
@@ -181,7 +181,7 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
                                 <tr><td width="40%">Waktu Rekam LHP</td><td>: <?= isset($lhp_detail['submit_time']) && $lhp_detail['submit_time'] != '0000-00-00 00:00:00' ? date('d M Y H:i:s', strtotime($lhp_detail['submit_time'])) : '-'; ?></td></tr>
                                 <tr><td>Catatan LHP</td><td>: <?= !empty($lhp_detail['Catatan']) ? nl2br(htmlspecialchars($lhp_detail['Catatan'])) : '<span class="text-muted"><em>Tidak ada catatan</em></span>'; ?></td></tr>
                                 <?php if (isset($lhp_detail['FileLHP']) && !empty($lhp_detail['FileLHP'])): ?>
-                                    <tr><td>File LHP</td><td>: <a href="<?= site_url($download_base_url . $lhp_detail['FileLHP']); ?>" target="_blank" title="Unduh/Lihat LHP"><i class="fas fa-file-pdf"></i> Lihat File</a></td></tr>
+                                    <tr><td>File LHP</td><td>: <a href="<?= base_url($download_base_url . $lhp_detail['FileLHP']); ?>" target="_blank" title="Unduh/Lihat LHP"><i class="fas fa-file-pdf"></i> Lihat File</a></td></tr>
                                 <?php else: ?>
                                     <tr><td>File LHP</td><td>: <span class="text-muted"><em>Tidak ada file</em></span></td></tr>
                                 <?php endif; ?>
@@ -189,7 +189,7 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
                                     <tr>
                                         <td>File Dokumentasi Foto</td>
                                         <td>
-                                            <a href="<?= site_url($download_base_url . $lhp_detail['file_dokumentasi_foto']); ?>" target="_blank" title="Unduh/Lihat Dokumentasi Foto">
+                                            <a href="<?= base_url($download_base_url . $lhp_detail['file_dokumentasi_foto']); ?>" target="_blank" title="Unduh/Lihat Dokumentasi Foto">
                                                 <i class="fas fa-camera"></i> Lihat Foto
                                             </a>
                                         </td>
@@ -226,7 +226,7 @@ $download_base_url = $download_url_segment ?? 'admin/downloadFile/';
                                     <tr>
                                         <td>File Surat Persetujuan</td>
                                         <td>:
-                                            <a href="<?= site_url($download_base_url . $permohonan_detail['file_surat_keputusan']); ?>" target="_blank" class="btn btn-sm btn-success" title="Unduh/Lihat Surat Persetujuan">
+                                            <a href="<?= base_url($download_base_url . $permohonan_detail['file_surat_keputusan']); ?>" target="_blank" class="btn btn-sm btn-success" title="Unduh/Lihat Surat Persetujuan">
                                                 <i class="fas fa-file-download"></i> Lihat Surat Persetujuan
                                             </a>
                                         </td>

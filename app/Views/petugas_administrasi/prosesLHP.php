@@ -19,7 +19,7 @@
                 Form LHP
             </div>
             <div class="card-body">
-                <form action="<?= site_url('petugas_administrasi/prosesLHP/' . ($permohonan['id'] ?? '')) ?>" method="POST">
+                <form action="<?= base_url('petugas_administrasi/prosesLHP/' . ($permohonan['id'] ?? '')) ?>" method="POST">
                     <?= csrf_field() ?>
                     
                     <fieldset class="border p-3 mb-3">

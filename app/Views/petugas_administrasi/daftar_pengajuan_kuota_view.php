@@ -69,16 +69,16 @@
                                     <td><?= isset($pk['admin_notes']) && !empty($pk['admin_notes']) ? nl2br(esc($pk['admin_notes'])) : '-' ?></td>
                                     <td><?= isset($pk['processed_date']) && $pk['processed_date'] != '0000-00-00 00:00:00' ? date('d/m/Y H:i', strtotime($pk['processed_date'])) : '-' ?></td>
                                     <td>
-                                        <a href="<?= site_url('petugas_administrasi/detailPengajuanKuotaAdmin/' . ($pk['id'] ?? '')) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Proses">
+                                        <a href="<?= base_url('petugas_administrasi/detailPengajuanKuotaAdmin/' . ($pk['id'] ?? '')) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Proses">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if (isset($pk['status']) && (strtolower($pk['status']) == 'pending' || strtolower($pk['status']) == 'diproses')) : ?>
-                                            <a href="<?= site_url('petugas_administrasi/proses_pengajuan_kuota/' . ($pk['id'] ?? '')) ?>" class="btn btn-success btn-circle btn-sm my-1" title="Proses Pengajuan">
+                                            <a href="<?= base_url('petugas_administrasi/proses_pengajuan_kuota/' . ($pk['id'] ?? '')) ?>" class="btn btn-success btn-circle btn-sm my-1" title="Proses Pengajuan">
                                                 <i class="fas fa-cogs"></i>
                                             </a>
                                         <?php endif; ?>
                                         <?php if (!empty($pk['file_sk_petugas']) && (isset($pk['status']) && (strtolower($pk['status']) == 'approved' || strtolower($pk['status']) == 'rejected'))): ?>
-                                            <a href="<?= site_url('petugas_administrasi/download_sk_kuota_admin/' . ($pk['id'] ?? '')) ?>" class="btn btn-primary btn-circle btn-sm my-1" title="Unduh SK Petugas">
+                                            <a href="<?= base_url('petugas_administrasi/download_sk_kuota_admin/' . ($pk['id'] ?? '')) ?>" class="btn btn-primary btn-circle btn-sm my-1" title="Unduh SK Petugas">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                         <?php endif; ?>

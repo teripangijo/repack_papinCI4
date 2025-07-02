@@ -71,17 +71,17 @@
                                     <td><?= isset($pk['admin_notes']) && !empty($pk['admin_notes']) ? nl2br(htmlspecialchars($pk['admin_notes'])) : '-'; ?></td>
                                     <td><?= isset($pk['processed_date']) && $pk['processed_date'] != '0000-00-00 00:00:00' ? date('d/m/Y H:i', strtotime($pk['processed_date'])) : '-'; ?></td>
                                     <td>
-                                        <a href="<?= site_url('admin/detailPengajuanKuotaAdmin/' . $pk['id']); ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Proses Admin">
+                                        <a href="<?= base_url('admin/detailPengajuanKuotaAdmin/' . $pk['id']); ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Proses Admin">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if (isset($pk['status']) && (strtolower($pk['status']) == 'pending' || strtolower($pk['status']) == 'diproses')) : ?>
-                                            <a href="<?= site_url('admin/proses_pengajuan_kuota/' . $pk['id']); ?>" class="btn btn-success btn-circle btn-sm my-1" title="Proses Pengajuan">
+                                            <a href="<?= base_url('admin/proses_pengajuan_kuota/' . $pk['id']); ?>" class="btn btn-success btn-circle btn-sm my-1" title="Proses Pengajuan">
                                                 <i class="fas fa-cogs"></i>
                                             </a>
                                         <?php endif; ?>
                                         <?php if (!empty($pk['file_sk_petugas'])): ?>
                                             <!-- [DIREVISI] -->
-                                            <a href="<?= site_url('admin/downloadFile/' . $pk['file_sk_petugas']); ?>" target="_blank" class="btn btn-primary btn-circle btn-sm my-1" title="Unduh SK Petugas">
+                                            <a href="<?= base_url('admin/downloadFile/' . $pk['file_sk_petugas']); ?>" target="_blank" class="btn btn-primary btn-circle btn-sm my-1" title="Unduh SK Petugas">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                         <?php endif; ?>

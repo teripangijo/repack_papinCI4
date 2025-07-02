@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= htmlspecialchars($subtitle ?? 'Detail Pantauan Pengajuan Kuota'); ?></h1>
-        <a href="<?= site_url('monitoring/pengajuan_kuota'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('monitoring/pengajuan_kuota'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Pantauan
         </a>
     </div>

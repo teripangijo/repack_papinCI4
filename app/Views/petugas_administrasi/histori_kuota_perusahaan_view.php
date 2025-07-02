@@ -17,7 +17,7 @@ $total_terpakai_agregat = $total_initial_agregat - $total_remaining_agregat;
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Histori & Detail Kuota Perusahaan') ?></h1>
-        <a href="<?= site_url('petugas_administrasi/monitoring_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas_administrasi/monitoring_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Monitoring Kuota
         </a>
     </div>
@@ -147,9 +147,9 @@ $total_terpakai_agregat = $total_initial_agregat - $total_remaining_agregat;
                                         $link_ref = '#'; $id_ref = $log['id_referensi_transaksi'];
                                         $tipe_ref_text = ucfirst(str_replace('_', ' ', $log['tipe_referensi']));
                                         if (in_array($log['tipe_referensi'], ['pengajuan_kuota_disetujui'])) {
-                                            $link_ref = site_url('petugas_administrasi/detailPengajuanKuotaAdmin/' . $id_ref);
+                                            $link_ref = base_url('petugas_administrasi/detailPengajuanKuotaAdmin/' . $id_ref);
                                         } elseif (in_array($log['tipe_referensi'], ['permohonan_impor_disetujui'])) {
-                                            $link_ref = site_url('petugas_administrasi/detail_permohonan_admin/' . $id_ref);
+                                            $link_ref = base_url('petugas_administrasi/detail_permohonan_admin/' . $id_ref);
                                         }
                                         ?>
                                         <br><small><a href="<?= $link_ref ?>" target="_blank" title="Lihat detail referensi">(Ref: <?= esc($tipe_ref_text . ' ID ' . $id_ref) ?>)</a></small>

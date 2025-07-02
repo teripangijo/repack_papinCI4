@@ -16,7 +16,7 @@
                 <?php endforeach; ?>
             </ul>
         
-            <p><a href="<?= site_url('petugas_administrasi/upload') ?>" class="btn btn-primary">Upload File Lain</a></p>
+            <p><a href="<?= base_url('petugas_administrasi/upload') ?>" class="btn btn-primary">Upload File Lain</a></p>
         </div>
     </div>
 

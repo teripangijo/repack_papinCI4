@@ -8,7 +8,7 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Proses Pengajuan Kuota') ?></h1>
-        <a href="<?= site_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Pengajuan
         </a>
     </div>
@@ -51,7 +51,7 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
                      <?php if (!empty($pengajuan['file_lampiran_user'])): ?>
                         <p><strong>File Lampiran User:</strong>
                             <!-- [DIREVISI] Mengarahkan link ke method downloadFile -->
-                            <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_lampiran_user']) ?>" target="_blank">
+                            <a href="<?= base_url('petugas_administrasi/downloadFile/' . $pengajuan['file_lampiran_user']) ?>" target="_blank">
                                 Lihat Lampiran
                             </a>
                         </p>
@@ -60,7 +60,7 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
             </div>
             <hr>
             <h5>Form Tindakan Admin</h5>
-            <form action="<?= site_url('petugas_administrasi/proses_pengajuan_kuota/' . $pengajuan['id']) ?>" method="post" enctype="multipart/form-data">
+            <form action="<?= base_url('petugas_administrasi/proses_pengajuan_kuota/' . $pengajuan['id']) ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <div class="form-group">
                     <label for="status_pengajuan">Status Pengajuan <span class="text-danger">*</span></label>
@@ -95,7 +95,7 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
                         </div>
                         <?php if (!empty($pengajuan['file_sk_petugas'])): ?>
                             <small class="form-text text-info">File SK saat ini:
-                                <a href="<?= site_url('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']) ?>" target="_blank">
+                                <a href="<?= base_url('petugas_administrasi/downloadFile/' . $pengajuan['file_sk_petugas']) ?>" target="_blank">
                                     Lihat File SK Saat Ini
                                 </a>. Upload file baru akan menggantikannya.
                             </small>
@@ -109,7 +109,7 @@ $nama_barang_diajukan = esc($pengajuan['nama_barang_kuota'] ?? 'Tidak Diketahui'
                 </div>
 
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Proses Pengajuan</button>
-                <a href="<?= site_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="btn btn-secondary ml-2">Batal</a>
+                <a href="<?= base_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="btn btn-secondary ml-2">Batal</a>
             </form>
         </div>
     </div>

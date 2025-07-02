@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Rekam LHP') ?></h1>
-        <a href="<?= site_url('petugas/daftar_pemeriksaan') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas/daftar_pemeriksaan') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Tugas
         </a>
     </div>
@@ -33,7 +33,7 @@
             </div>
             <hr>
 
-            <form action="<?= site_url('petugas/rekam_lhp/' . $permohonan['id']) ?>" method="post" enctype="multipart/form-data">
+            <form action="<?= base_url('petugas/rekam_lhp/' . $permohonan['id']) ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <input type="hidden" name="id_lhp_existing" value="<?= esc($lhp_data['id'] ?? ($lhp_data['id_lhp'] ?? '')) ?>">
 
@@ -76,7 +76,7 @@
                             <label class="custom-file-label" for="FileLHP"><?= esc($lhp_data['FileLHP'] ?? 'Pilih file...') ?></label>
                         </div>
                         <?php if (!empty($lhp_data['FileLHP'])): ?>
-                            <small class="form-text text-muted">File saat ini: <a href="<?= site_url('petugas/download/lhp/' . esc($lhp_data['FileLHP'])) ?>" target="_blank"><?= esc($lhp_data['FileLHP']) ?></a>. Pilih file baru untuk mengganti.</small>
+                            <small class="form-text text-muted">File saat ini: <a href="<?= base_url('petugas/download/lhp/' . esc($lhp_data['FileLHP'])) ?>" target="_blank"><?= esc($lhp_data['FileLHP']) ?></a>. Pilih file baru untuk mengganti.</small>
                         <?php else: ?>
                              <small class="form-text text-muted">Wajib diisi untuk perekaman LHP baru.</small>
                         <?php endif; ?>
@@ -89,7 +89,7 @@
                             <label class="custom-file-label" for="file_dokumentasi_foto"><?= esc($lhp_data['file_dokumentasi_foto'] ?? 'Pilih file...') ?></label>
                         </div>
                         <?php if (!empty($lhp_data['file_dokumentasi_foto'])): ?>
-                            <small class="form-text text-muted">File saat ini: <a href="<?= site_url('petugas/download/dokumentasi_lhp/' . esc($lhp_data['file_dokumentasi_foto'])) ?>" target="_blank"><?= esc($lhp_data['file_dokumentasi_foto']) ?></a>. Pilih file baru untuk mengganti.</small>
+                            <small class="form-text text-muted">File saat ini: <a href="<?= base_url('petugas/download/dokumentasi_lhp/' . esc($lhp_data['file_dokumentasi_foto'])) ?>" target="_blank"><?= esc($lhp_data['file_dokumentasi_foto']) ?></a>. Pilih file baru untuk mengganti.</small>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                 <button type="submit" class="btn btn-primary btn-user btn-block">
                     <i class="fas fa-save fa-fw"></i> <?= isset($lhp_data) && !empty($lhp_data) ? 'Update' : 'Simpan' ?> Data LHP
                 </button>
-                <a href="<?= site_url('petugas/daftar_pemeriksaan') ?>" class="btn btn-secondary btn-user btn-block mt-2">
+                <a href="<?= base_url('petugas/daftar_pemeriksaan') ?>" class="btn btn-secondary btn-user btn-block mt-2">
                     <i class="fas fa-times fa-fw"></i> Batal
                 </a>
             </form>

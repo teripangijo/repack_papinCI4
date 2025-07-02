@@ -29,7 +29,7 @@
                 Form Permohonan
             </div>
             <div class="card-body">
-                <form action="<?= site_url('petugas_administrasi/proses/' . ($permohonan['id'] ?? '')) ?>" method="POST">
+                <form action="<?= base_url('petugas_administrasi/proses/' . ($permohonan['id'] ?? '')) ?>" method="POST">
                     <?= csrf_field() ?>
                     <div class="row">
                         <div class="col">

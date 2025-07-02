@@ -7,7 +7,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= htmlspecialchars($subtitle ?? 'Penunjukan Petugas Pemeriksa'); ?></h1>
-        <a href="<?= site_url('admin/permohonanMasuk'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('admin/permohonanMasuk'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Permohonan
         </a>
     </div>
@@ -50,7 +50,7 @@
             </p>
             <hr>
 
-            <form action="<?= site_url('admin/penunjukanPetugas/' . $permohonan['id']); ?>" method="post" enctype="multipart/form-data">
+            <form action="<?= base_url('admin/penunjukanPetugas/' . $permohonan['id']); ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field(); // CSRF token for CI4 ?>
                 <div class="form-group">
                     <label for="petugas_id">Pilih Petugas/Pemeriksa <span class="text-danger">*</span></label>
@@ -120,7 +120,7 @@
                 </script>
 
                 <button type="submit" class="btn btn-primary">Simpan Penunjukan</button>
-                <a href="<?= site_url('admin/permohonanMasuk'); ?>" class="btn btn-secondary ml-2">Batal</a>
+                <a href="<?= base_url('admin/permohonanMasuk'); ?>" class="btn btn-secondary ml-2">Batal</a>
             </form>
         </div>
     </div>

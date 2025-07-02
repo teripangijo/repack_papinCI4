@@ -72,7 +72,7 @@ $ttd_pic_file = $permohonan['file_ttd_pic_perusahaan'] ?? null;
         <tr>
             <td style="width: 20%; text-align: center; vertical-align: top;">
                 <?php if ($logo_perusahaan_file) : ?>
-                    <img src="<?= site_url('user/downloadFile/' . esc($logo_perusahaan_file, 'url')) ?>" alt="Logo Perusahaan" style="max-width: 90px; max-height: 90px; object-fit: contain;">
+                    <img src="<?= base_url('user/downloadFile/' . esc($logo_perusahaan_file, 'url')) ?>" alt="Logo Perusahaan" style="max-width: 90px; max-height: 90px; object-fit: contain;">
                 <?php else: ?>
                     <div style="width:90px; height:90px; border:1px solid #eee; display:flex; align-items:center; justify-content:center; margin:auto; font-size:10px; color: #ccc;">LOGO</div>
                 <?php endif; ?>
@@ -138,7 +138,7 @@ $ttd_pic_file = $permohonan['file_ttd_pic_perusahaan'] ?? null;
         <p>Hormat Kami,</p>
         <p>PT. <?= esc(strtoupper($permohonan['NamaPers'] ?? 'NAMA PERUSAHAAN')) ?></p>
         <?php if ($ttd_pic_file) : ?>
-            <img src="<?= site_url('user/downloadFile/' . esc($ttd_pic_file, 'url')) ?>" alt="Tanda Tangan PIC" style="max-height: 50px; margin-top:10px; margin-bottom:10px;">
+            <img src="<?= base_url('user/downloadFile/' . esc($ttd_pic_file, 'url')) ?>" alt="Tanda Tangan PIC" style="max-height: 50px; margin-top:10px; margin-bottom:10px;">
         <?php else : ?>
             <div style="height: 70px;">&nbsp;</div>
         <?php endif; ?>
@@ -152,7 +152,7 @@ $ttd_pic_file = $permohonan['file_ttd_pic_perusahaan'] ?? null;
             if (document.referrer && document.referrer.indexOf(window.location.hostname) !== -1 && history.length > 1) {
                 history.back();
             } else {
-                window.location.href = "<?= site_url('user/daftarPermohonan') ?>";
+                window.location.href = "<?= base_url('user/daftarPermohonan') ?>";
             }
         }
     </script>

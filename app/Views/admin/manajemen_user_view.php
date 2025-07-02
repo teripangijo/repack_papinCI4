@@ -16,7 +16,7 @@
                     <?php if (!empty($roles)): ?>
                         <?php foreach($roles as $role): ?>
                             <?php if ($role['id'] != 1): // Admin role cannot be added here ?>
-                                <a class="dropdown-item" href="<?= site_url('admin/tambah_user/' . $role['id']); ?>">Tambah <?= htmlspecialchars($role['role']); ?></a>
+                                <a class="dropdown-item" href="<?= base_url('admin/tambah_user/' . $role['id']); ?>">Tambah <?= htmlspecialchars($role['role']); ?></a>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -63,20 +63,20 @@
                             </td>
                             <td><?= isset($usr['date_created']) ? date('d/m/Y H:i', $usr['date_created']) : '-'; ?></td>
                             <td>
-                                <a href="<?= site_url('admin/edit_user/' . $usr['id']); ?>" class="btn btn-warning btn-circle btn-sm my-1" title="Edit User">
+                                <a href="<?= base_url('admin/edit_user/' . $usr['id']); ?>" class="btn btn-warning btn-circle btn-sm my-1" title="Edit User">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <?php
                                 // Allow changing password if not the current logged-in user and not the main admin (ID 1)
                                 if ($usr['id'] != 1 && $usr['id'] != $user['id']) : ?>
-                                <a href="<?= site_url('admin/ganti_password_user/' . $usr['id']); ?>" class="btn btn-info btn-circle btn-sm my-1" title="Ganti Password User Ini">
+                                <a href="<?= base_url('admin/ganti_password_user/' . $usr['id']); ?>" class="btn btn-info btn-circle btn-sm my-1" title="Ganti Password User Ini">
                                     <i class="fas fa-key"></i>
                                 </a>
                                 <?php endif; ?>
 
                                 <?php // Allow deleting user if not the main admin (ID 1)
                                 if ($usr['id'] != 1) : ?>
-                                <a href="<?= site_url('admin/delete_user/' . $usr['id']); ?>" class="btn btn-danger btn-circle btn-sm my-1 btn-delete" title="Hapus User" data-name="<?= htmlspecialchars($usr['name']); ?>" data-url="<?= site_url('admin/delete_user/' . $usr['id']); ?>">
+                                <a href="<?= base_url('admin/delete_user/' . $usr['id']); ?>" class="btn btn-danger btn-circle btn-sm my-1 btn-delete" title="Hapus User" data-name="<?= htmlspecialchars($usr['name']); ?>" data-url="<?= base_url('admin/delete_user/' . $usr['id']); ?>">
                                     <i class="fas fa-trash"></i>
                                 </a>
                                 <?php endif; ?>

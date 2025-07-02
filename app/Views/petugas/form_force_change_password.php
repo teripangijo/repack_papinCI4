@@ -21,7 +21,7 @@
                         </div>
                     <?php endif; ?>
 
-                    <form method="post" action="<?= site_url('petugas/force_change_password_page') ?>">
+                    <form method="post" action="<?= base_url('petugas/force_change_password_page') ?>">
                         <?= csrf_field() ?>
                         <div class="form-group">
                             <label for="new_password">Password Baru <span class="text-danger">*</span></label>
@@ -46,7 +46,7 @@
                     </form>
                     <hr>
                     <div class="text-center">
-                        <a class="small" href="<?= site_url('auth/logout') ?>">Logout</a>
+                        <a class="small" href="<?= base_url('auth/logout') ?>">Logout</a>
                     </div>
                 </div>
             </div>

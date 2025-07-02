@@ -42,7 +42,7 @@ $validationService = isset($validation) ? $validation : \Config\Services::valida
                             <?= session()->getFlashdata('message'); ?>
                         <?php endif; ?>
 
-                        <form class="user" method="post" action="<?= site_url('auth/changepass/' . $user_id_to_change); ?>">
+                        <form class="user" method="post" action="<?= base_url('auth/changepass/' . $user_id_to_change); ?>">
                             <?= csrf_field() ?>
                             <input type="hidden" name="user_id" value="<?= $user_id_to_change; ?>">
                             
@@ -100,7 +100,7 @@ $validationService = isset($validation) ? $validation : \Config\Services::valida
                         </form>
                         <hr>
                         <div class="text-center">
-                            <a class="btn btn-secondary btn-sm" href="<?= site_url($cancel_url); ?>">Cancel</a>
+                            <a class="btn btn-secondary btn-sm" href="<?= base_url($cancel_url); ?>">Cancel</a>
                         </div>
                     </div>
                 </div>

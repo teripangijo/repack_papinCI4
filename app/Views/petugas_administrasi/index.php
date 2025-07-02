@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-xl-6 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
-                <a href="<?= site_url('petugas_administrasi/permohonanMasuk') ?>" class="text-decoration-none">
+                <a href="<?= base_url('petugas_administrasi/permohonanMasuk') ?>" class="text-decoration-none">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
@@ -29,7 +29,7 @@
         
         <div class="col-xl-6 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
-                <a href="<?= site_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="text-decoration-none">
+                <a href="<?= base_url('petugas_administrasi/daftar_pengajuan_kuota') ?>" class="text-decoration-none">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">

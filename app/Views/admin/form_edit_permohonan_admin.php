@@ -29,7 +29,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Edit Permohonan Impor Kembali'; ?></h1>
-        <a href="<?= site_url('user/daftarPermohonan'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('user/daftarPermohonan'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Permohonan
         </a>
     </div>
@@ -63,7 +63,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
             </div>
             <hr>
 
-            <form action="<?= site_url('admin/edit_permohonan/' . $permohonan_edit['id']); ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form action="<?= base_url('admin/edit_permohonan/' . $permohonan_edit['id']); ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
             <?= csrf_field(); // CSRF token for CI4 ?>
 
             <?php // Hidden inputs for form data ?>
@@ -158,7 +158,7 @@ if (!empty($id_kuota_barang_saat_ini) && isset($list_barang_berkuota) && is_arra
             <button type="submit" class="btn btn-primary btn-user btn-block mt-4" id="submitEditPermohonanBtn">
                 <i class="fas fa-save fa-fw"></i> Simpan Perubahan Permohonan
             </button>
-            <a href="<?= site_url('admin/permohonanMasuk'); ?>" class="btn btn-secondary btn-user btn-block mt-2">
+            <a href="<?= base_url('admin/permohonanMasuk'); ?>" class="btn btn-secondary btn-user btn-block mt-2">
                 <i class="fas fa-times fa-fw"></i> Batal
             </a>
             </form>

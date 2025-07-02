@@ -47,7 +47,7 @@
                                         <td><?= esc($p['NoSkep'] ?? '') ?></td>
                                         <td><?= esc($p['tgl_skep'] ?? '') ?></td>
                                         <td>
-                                            <a class="btn btn-success btn-sm" href="<?= site_url('petugas_administrasi/uploadproses/' . esc($p['id'], 'url')) ?>">
+                                            <a class="btn btn-success btn-sm" href="<?= base_url('petugas_administrasi/uploadproses/' . esc($p['id'], 'url')) ?>">
                                                 <i class="fas fa-upload"></i> Upload
                                             </a>
                                         </td>

@@ -7,7 +7,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= htmlspecialchars($subtitle ?? 'Tambah User Baru'); ?></h1>
-        <a href="<?= site_url('admin/manajemen_user'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('admin/manajemen_user'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Manajemen User
         </a>
     </div>
@@ -33,7 +33,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Formulir Tambah User untuk Role: <?= htmlspecialchars($target_role_info['role'] ?? 'Tidak Diketahui'); ?></h6>
         </div>
         <div class="card-body">
-            <form action="<?= site_url('admin/tambah_user/' . $role_id_to_add); ?>" method="post" id="tambahUserForm">
+            <form action="<?= base_url('admin/tambah_user/' . $role_id_to_add); ?>" method="post" id="tambahUserForm">
                 <?= csrf_field(); ?>
                 <input type="hidden" name="role_id_hidden" value="<?= htmlspecialchars($role_id_to_add); ?>">
                 <input type="hidden" name="form_token" value="<?= htmlspecialchars($form_token ?? ''); ?>">
@@ -121,7 +121,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Simpan User
                     </button>
-                    <a href="<?= site_url('admin/manajemen_user'); ?>" class="btn btn-secondary ml-2">
+                    <a href="<?= base_url('admin/manajemen_user'); ?>" class="btn btn-secondary ml-2">
                         <i class="fas fa-times"></i> Batal
                     </a>
                 </div>

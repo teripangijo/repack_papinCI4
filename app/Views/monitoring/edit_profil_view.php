@@ -7,7 +7,7 @@
         <div class="card-body">
             <h5 class="card-title">Keamanan Akun</h5>
             <p>Amankan akun Anda dengan lapisan verifikasi tambahan.</p>
-            <a href="<?= site_url('monitoring/reset_mfa'); ?>" class="btn btn-primary">
+            <a href="<?= base_url('monitoring/reset_mfa'); ?>" class="btn btn-primary">
                 Atur Ulang Multi-Factor Authentication (MFA)
             </a>
         </div>

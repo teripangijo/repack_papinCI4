@@ -8,7 +8,7 @@
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= isset($subtitle) ? htmlspecialchars($subtitle) : 'Proses Surat & LHP'; ?></h1>
-        <a href="<?= site_url('admin/permohonanMasuk'); ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('admin/permohonanMasuk'); ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Permohonan
         </a>
     </div>
@@ -29,7 +29,7 @@
                         <h6 class="m-0 font-weight-bold text-primary">Formulir Penyelesaian Permohonan ID: <?= htmlspecialchars($permohonan['id']); ?></h6>
                     </div>
                     <div class="card-body">
-                        <form action="<?= site_url('admin/prosesSurat/' . $permohonan['id']); ?>" method="post" enctype="multipart/form-data">
+                        <form action="<?= base_url('admin/prosesSurat/' . $permohonan['id']); ?>" method="post" enctype="multipart/form-data">
                         <?= csrf_field(); // CSRF token for CI4 ?>
 
                         <p><strong>Nama Perusahaan:</strong> <?= htmlspecialchars($permohonan['NamaPers']); ?></p>

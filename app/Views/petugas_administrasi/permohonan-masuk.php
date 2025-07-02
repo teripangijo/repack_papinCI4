@@ -65,7 +65,7 @@
                                     </td>
                                     <td class="text-center">
                                         <?php if(isset($p['id'])): ?>
-                                            <a href="<?= site_url('petugas_administrasi/detail_permohonan_admin/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Permohonan Lengkap">
+                                            <a href="<?= base_url('petugas_administrasi/detail_permohonan_admin/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail Permohonan Lengkap">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <?php
@@ -73,23 +73,23 @@
                                                 switch ($p['status']) {
                                                     case '0': 
                                                     case '5': 
-                                                        echo '<a href="' . site_url('petugas_administrasi/penunjukanPetugas/' . $p['id']) . '" class="btn btn-success btn-circle btn-sm my-1" title="Proses & Tunjuk Petugas Pemeriksa"><i class="fas fa-user-plus"></i></a>';
-                                                        echo '<a href="' . site_url('petugas_administrasi/tolak_permohonan_awal/' . $p['id']) . '" class="btn btn-warning btn-circle btn-sm my-1" title="Tolak Langsung Permohonan"><i class="fas fa-ban"></i></a>';
+                                                        echo '<a href="' . base_url('petugas_administrasi/penunjukanPetugas/' . $p['id']) . '" class="btn btn-success btn-circle btn-sm my-1" title="Proses & Tunjuk Petugas Pemeriksa"><i class="fas fa-user-plus"></i></a>';
+                                                        echo '<a href="' . base_url('petugas_administrasi/tolak_permohonan_awal/' . $p['id']) . '" class="btn btn-warning btn-circle btn-sm my-1" title="Tolak Langsung Permohonan"><i class="fas fa-ban"></i></a>';
                                                         break;
                                                     case '1':
-                                                        echo '<a href="' . site_url('petugas_administrasi/penunjukanPetugas/' . $p['id']) . '" class="btn btn-warning btn-circle btn-sm my-1" title="Lihat/Edit Penunjukan Petugas"><i class="fas fa-user-edit"></i></a>';
+                                                        echo '<a href="' . base_url('petugas_administrasi/penunjukanPetugas/' . $p['id']) . '" class="btn btn-warning btn-circle btn-sm my-1" title="Lihat/Edit Penunjukan Petugas"><i class="fas fa-user-edit"></i></a>';
                                                         break;
                                                     case '2':
-                                                        echo '<a href="' . site_url('petugas_administrasi/prosesSurat/' . $p['id']) . '" class="btn btn-primary btn-circle btn-sm my-1" title="Proses Penyelesaian Akhir Permohonan"><i class="fas fa-flag-checkered"></i></a>';
+                                                        echo '<a href="' . base_url('petugas_administrasi/prosesSurat/' . $p['id']) . '" class="btn btn-primary btn-circle btn-sm my-1" title="Proses Penyelesaian Akhir Permohonan"><i class="fas fa-flag-checkered"></i></a>';
                                                         break;
                                                 }
                                             }
                                             if (isset($p['status']) && in_array($p['status'], ['0', '5', '1'])) {
-                                                echo '<a href="' . site_url('petugas_administrasi/edit_permohonan/' . $p['id']) . '" class="btn btn-secondary btn-circle btn-sm my-1" title="Edit Data Pengajuan Permohonan"><i class="fas fa-pencil-alt"></i></a>';
+                                                echo '<a href="' . base_url('petugas_administrasi/edit_permohonan/' . $p['id']) . '" class="btn btn-secondary btn-circle btn-sm my-1" title="Edit Data Pengajuan Permohonan"><i class="fas fa-pencil-alt"></i></a>';
                                             }
                                             if (isset($p['status']) && in_array($p['status'], ['0', '5', '6'])) { 
                                                 $confirm_msg = "APAKAH ANDA YAKIN ingin menghapus permohonan dengan ID Aju: " . esc($p['id']) . " atas nama " . esc($p['NamaPers'] ?? 'N/A') . "?\\nTindakan ini tidak dapat diurungkan!";
-                                                echo '<a href="' . site_url('petugas_administrasi/hapus_permohonan/' . $p['id']) . '" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus Permohonan" onclick="return confirm(\''.$confirm_msg.'\');"><i class="fas fa-trash"></i></a>';
+                                                echo '<a href="' . base_url('petugas_administrasi/hapus_permohonan/' . $p['id']) . '" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus Permohonan" onclick="return confirm(\''.$confirm_msg.'\');"><i class="fas fa-trash"></i></a>';
                                             }
                                             ?>
                                         <?php else: ?>

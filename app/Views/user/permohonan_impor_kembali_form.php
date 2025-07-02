@@ -27,7 +27,7 @@ if (!empty($selected_id_kuota_barang_js) && !empty($list_barang_berkuota)) {
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Form Permohonan Impor Kembali') ?></h1>
-        <a href="<?= site_url('user/daftarPermohonan') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('user/daftarPermohonan') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar Permohonan
         </a>
     </div>
@@ -41,7 +41,7 @@ if (!empty($selected_id_kuota_barang_js) && !empty($list_barang_berkuota)) {
         </div>
         <div class="card-body">
             <?php if (isset($user['is_active']) && $user['is_active'] == 1 && !empty($user_perusahaan)) : ?>
-                <form action="<?= site_url('user/permohonan_impor_kembali') ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <form action="<?= base_url('user/permohonan_impor_kembali') ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     <?= csrf_field() ?>
 
                     <div class="alert alert-secondary small">
@@ -153,7 +153,7 @@ if (!empty($selected_id_kuota_barang_js) && !empty($list_barang_berkuota)) {
 
             <?php else : ?>
                 <div class="alert alert-warning" role="alert">
-                    Akun Anda belum aktif atau data perusahaan belum lengkap. Silakan lengkapi <a href="<?= site_url('user/edit') ?>" class="alert-link">profil perusahaan Anda</a> terlebih dahulu.
+                    Akun Anda belum aktif atau data perusahaan belum lengkap. Silakan lengkapi <a href="<?= base_url('user/edit') ?>" class="alert-link">profil perusahaan Anda</a> terlebih dahulu.
                 </div>
             <?php endif; ?>
         </div>

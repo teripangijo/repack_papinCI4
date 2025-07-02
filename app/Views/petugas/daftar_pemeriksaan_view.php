@@ -42,11 +42,11 @@
                             <td><?= esc($tugas['nama_pemohon'] ?? 'N/A') ?></td>
                             <td><?= isset($tugas['WaktuPenunjukanPetugas']) && $tugas['WaktuPenunjukanPetugas'] != '0000-00-00 00:00:00' ? date('d/m/Y H:i', strtotime($tugas['WaktuPenunjukanPetugas'])) : '-' ?></td>
                             <td class="text-center">
-                                <a href="<?= site_url('petugas/rekam_lhp/' . $tugas['id']) ?>" class="btn btn-sm btn-primary" title="Rekam Laporan Hasil Pemeriksaan untuk ID Aju <?= esc($tugas['id']) ?>">
+                                <a href="<?= base_url('petugas/rekam_lhp/' . $tugas['id']) ?>" class="btn btn-sm btn-primary" title="Rekam Laporan Hasil Pemeriksaan untuk ID Aju <?= esc($tugas['id']) ?>">
                                     <i class="fas fa-file-alt mr-1"></i> Rekam LHP
                                 </a>
                                 <?php if (!empty($tugas['FileSuratTugas'])): ?>
-                                    <a href="<?= site_url('petugas/download/surat_tugas/' . esc($tugas['FileSuratTugas'])) ?>" target="_blank" class="btn btn-sm btn-info mt-1" title="Lihat File Surat Tugas">
+                                    <a href="<?= base_url('petugas/download/surat_tugas/' . esc($tugas['FileSuratTugas'])) ?>" target="_blank" class="btn btn-sm btn-info mt-1" title="Lihat File Surat Tugas">
                                         <i class="fas fa-file-pdf mr-1"></i> Lihat ST
                                     </a>
                                 <?php endif; ?>

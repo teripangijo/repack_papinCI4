@@ -36,7 +36,7 @@
                                 <td><?= $no++ ?></td>
                                 <td>
                                     <?php if (isset($item['id_pers']) && !empty($item['id_pers'])): ?>
-                                        <a href="<?= site_url('petugas_administrasi/histori_kuota_perusahaan/' . $item['id_pers']) ?>" title="Lihat Histori & Detail Kuota Barang <?= esc($item['NamaPers'] ?? '') ?>">
+                                        <a href="<?= base_url('petugas_administrasi/histori_kuota_perusahaan/' . $item['id_pers']) ?>" title="Lihat Histori & Detail Kuota Barang <?= esc($item['NamaPers'] ?? '') ?>">
                                             <?= esc($item['NamaPers'] ?? 'Nama Perusahaan Tidak Ada') ?>
                                         </a>
                                     <?php else: ?>

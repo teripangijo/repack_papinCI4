@@ -20,7 +20,7 @@ if(isset($lhp_detail['id_permohonan_ajuan'])){
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Detail LHP') ?></h1>
-        <a href="<?= site_url('petugas/riwayat_lhp_direkam') ?>" class="btn btn-sm btn-secondary shadow-sm">
+        <a href="<?= base_url('petugas/riwayat_lhp_direkam') ?>" class="btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Riwayat LHP
         </a>
     </div>
@@ -67,17 +67,17 @@ if(isset($lhp_detail['id_permohonan_ajuan'])){
                         <p><?= !empty($lhp_detail['Catatan']) ? nl2br(esc($lhp_detail['Catatan'])) : '<span class="text-muted"><em>Tidak ada catatan.</em></span>' ?></p>
                         <p><strong>Waktu Rekam LHP:</strong> <?= isset($lhp_detail['submit_time']) ? date('d M Y H:i:s', strtotime($lhp_detail['submit_time'])) : '-' ?></p>
                         <?php if (!empty($lhp_detail['FileLHP'])): ?>
-                            <p><strong>File LHP:</strong> <a href="<?= site_url('petugas/download/lhp/' . esc($lhp_detail['FileLHP'])) ?>" target="_blank"><?= esc($lhp_detail['FileLHP']) ?></a></p>
+                            <p><strong>File LHP:</strong> <a href="<?= base_url('petugas/download/lhp/' . esc($lhp_detail['FileLHP'])) ?>" target="_blank"><?= esc($lhp_detail['FileLHP']) ?></a></p>
                         <?php endif; ?>
                         <?php if (!empty($lhp_detail['file_dokumentasi_foto'])): ?>
-                            <p><strong>File Dokumentasi Foto:</strong> <a href="<?= site_url('petugas/download/dokumentasi_lhp/' . esc($lhp_detail['file_dokumentasi_foto'])) ?>" target="_blank"><?= esc($lhp_detail['file_dokumentasi_foto']) ?></a></p>
+                            <p><strong>File Dokumentasi Foto:</strong> <a href="<?= base_url('petugas/download/dokumentasi_lhp/' . esc($lhp_detail['file_dokumentasi_foto'])) ?>" target="_blank"><?= esc($lhp_detail['file_dokumentasi_foto']) ?></a></p>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <?php if ($status_permohonan_terkait == '2'): ?>
                     <hr>
-                    <a href="<?= site_url('petugas/rekam_lhp/' . $lhp_detail['id_permohonan_ajuan']) ?>" class="btn btn-warning">
+                    <a href="<?= base_url('petugas/rekam_lhp/' . $lhp_detail['id_permohonan_ajuan']) ?>" class="btn btn-warning">
                         <i class="fas fa-edit"></i> Edit LHP Ini
                     </a>
                 <?php endif; ?>

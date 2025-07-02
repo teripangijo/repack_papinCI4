@@ -30,14 +30,14 @@
                     
                     <hr>
                     
-                    <form action="<?= site_url('user/verify_mfa') ?>" method="post">
+                    <form action="<?= base_url('user/verify_mfa') ?>" method="post">
                         <?= csrf_field() ?>
                         <div class="form-group">
                             <label for="one_time_password">Masukkan Kode Verifikasi 6-Digit</label>
                             <input type="text" class="form-control" id="one_time_password" name="one_time_password" required autocomplete="off" maxlength="6" pattern="\d{6}">
                         </div>
                         <button type="submit" class="btn btn-primary">Aktifkan & Verifikasi</button>
-                        <a href="<?= site_url('auth/logout') ?>" class="btn btn-secondary">Batal</a>
+                        <a href="<?= base_url('auth/logout') ?>" class="btn btn-secondary">Batal</a>
                     </form>
                 </div>
             </div>

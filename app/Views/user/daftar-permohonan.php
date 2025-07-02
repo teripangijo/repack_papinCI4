@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><?= esc($subtitle ?? 'Daftar Permohonan Impor Kembali Saya') ?></h1>
-        <a href="<?= site_url('user/permohonan_impor_kembali') ?>" class="btn btn-sm btn-primary shadow-sm">
+        <a href="<?= base_url('user/permohonan_impor_kembali') ?>" class="btn btn-sm btn-primary shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50"></i> Buat Permohonan Baru
         </a>
     </div>
@@ -65,17 +65,17 @@
                                         ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="<?= site_url('user/detailPermohonan/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail">
+                                        <a href="<?= base_url('user/detailPermohonan/' . $p['id']) ?>" class="btn btn-info btn-circle btn-sm my-1" title="Lihat Detail">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php
                                         $deletable_import_statuses = ['0', '5'];
                                         if (isset($p['status']) && in_array($p['status'], $deletable_import_statuses)):
                                         ?>
-                                            <a href="<?= site_url('user/editpermohonan/' . $p['id']) ?>" class="btn btn-warning btn-circle btn-sm my-1" title="Edit Permohonan">
+                                            <a href="<?= base_url('user/editpermohonan/' . $p['id']) ?>" class="btn btn-warning btn-circle btn-sm my-1" title="Edit Permohonan">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </a>
-                                            <a href="<?= site_url('user/hapus_permohonan_impor/' . $p['id']) ?>" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus Permohonan" onclick="return confirm('Apakah Anda yakin ingin menghapus permohonan impor dengan ID Aju: <?= esc($p['id']) ?> ini?');">
+                                            <a href="<?= base_url('user/hapus_permohonan_impor/' . $p['id']) ?>" class="btn btn-danger btn-circle btn-sm my-1" title="Hapus Permohonan" onclick="return confirm('Apakah Anda yakin ingin menghapus permohonan impor dengan ID Aju: <?= esc($p['id']) ?> ini?');">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         <?php endif; ?>

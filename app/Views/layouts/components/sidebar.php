@@ -3,17 +3,17 @@ $role_id = session()->get('role_id');
 $uri = service('uri'); // Mengambil service URI di CI4
 
 // Logika untuk menentukan dashboard link dan teks brand
-$dashboard_link = site_url('auth/login'); // Default
+$dashboard_link = base_url('auth/login'); // Default
 $brand_super_text = "Guest";
 $icon_class = "fas fa-recycle";
 
 if ($role_id) {
     switch ($role_id) {
-        case 1: $dashboard_link = site_url('admin'); $brand_super_text = "Admin"; $icon_class = "fas fa-user-shield"; break;
-        case 2: $dashboard_link = site_url('user'); $brand_super_text = "User"; $icon_class = "fas fa-box-open"; break;
-        case 3: $dashboard_link = site_url('petugas'); $brand_super_text = "Petugas"; $icon_class = "fas fa-user-secret"; break;
-        case 4: $dashboard_link = site_url('monitoring'); $brand_super_text = "Monitoring"; $icon_class = "fas fa-binoculars"; break;
-        case 5: $dashboard_link = site_url('petugas_administrasi'); $brand_super_text = "Pet. Administrasi"; $icon_class = "fas fa-user-cog"; break;
+        case 1: $dashboard_link = base_url('admin'); $brand_super_text = "Admin"; $icon_class = "fas fa-user-shield"; break;
+        case 2: $dashboard_link = base_url('user'); $brand_super_text = "User"; $icon_class = "fas fa-box-open"; break;
+        case 3: $dashboard_link = base_url('petugas'); $brand_super_text = "Petugas"; $icon_class = "fas fa-user-secret"; break;
+        case 4: $dashboard_link = base_url('monitoring'); $brand_super_text = "Monitoring"; $icon_class = "fas fa-binoculars"; break;
+        case 5: $dashboard_link = base_url('petugas_administrasi'); $brand_super_text = "Pet. Administrasi"; $icon_class = "fas fa-user-cog"; break;
     }
 }
 ?>
@@ -44,21 +44,21 @@ if ($role_id) {
         <hr class="sidebar-divider">
         <div class="sidebar-heading">Manajemen Layanan</div>
         <li class="nav-item <?= ($uri->getSegment(2) === 'monitoring_kuota') ? 'active' : '' ?>">
-            <a class="nav-link" href="<?= site_url('admin/monitoring_kuota') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Monitoring Kuota</span></a>
+            <a class="nav-link" href="<?= base_url('admin/monitoring_kuota') ?>"><i class="fas fa-fw fa-chart-pie"></i><span>Monitoring Kuota</span></a>
         </li>
         <li class="nav-item <?= ($uri->getSegment(2) === 'daftar_pengajuan_kuota') ? 'active' : '' ?>">
-            <a class="nav-link" href="<?= site_url('admin/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-invoice-dollar"></i><span>Pengajuan Kuota</span></a>
+            <a class="nav-link" href="<?= base_url('admin/daftar_pengajuan_kuota') ?>"><i class="fas fa-fw fa-file-invoice-dollar"></i><span>Pengajuan Kuota</span></a>
         </li>
         <li class="nav-item <?= ($uri->getSegment(2) === 'permohonanMasuk') ? 'active' : '' ?>">
-            <a class="nav-link" href="<?= site_url('admin/permohonanMasuk') ?>"><i class="fas fa-fw fa-file-import"></i><span>Permohonan Impor</span></a>
+            <a class="nav-link" href="<?= base_url('admin/permohonanMasuk') ?>"><i class="fas fa-fw fa-file-import"></i><span>Permohonan Impor</span></a>
         </li>
         <hr class="sidebar-divider">
         <div class="sidebar-heading">Pengaturan Sistem</div>
         <li class="nav-item <?= ($uri->getSegment(2) === 'manajemen_user') ? 'active' : '' ?>">
-            <a class="nav-link" href="<?= site_url('admin/manajemen_user') ?>"><i class="fas fa-fw fa-users-cog"></i><span>Manajemen User</span></a>
+            <a class="nav-link" href="<?= base_url('admin/manajemen_user') ?>"><i class="fas fa-fw fa-users-cog"></i><span>Manajemen User</span></a>
         </li>
         <li class="nav-item <?= (in_array($uri->getSegment(2), ['role', 'roleAccess'])) ? 'active' : '' ?>">
-            <a class="nav-link" href="<?= site_url('admin/role') ?>"><i class="fas fa-fw fa-user-tag"></i><span>Manajemen Role</span></a>
+            <a class="nav-link" href="<?= base_url('admin/role') ?>"><i class="fas fa-fw fa-user-tag"></i><span>Manajemen Role</span></a>
         </li>
     <?php endif; ?>
     

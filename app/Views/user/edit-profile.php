@@ -20,7 +20,7 @@ $existing_skep_fasilitas_file = $user_perusahaan['FileSkepFasilitas'] ?? null;
 
 $current_user_image = $user['image'] ?? 'default.jpg';
 // [DIREVISI] Menggunakan controller downloadFile untuk menampilkan gambar
-$profileImagePath = ($current_user_image != 'default.jpg' && !empty($current_user_image)) ? site_url('user/downloadFile/' . esc($current_user_image)) : base_url('assets/img/default-avatar.png');
+$profileImagePath = ($current_user_image != 'default.jpg' && !empty($current_user_image)) ? base_url('user/downloadFile/' . esc($current_user_image)) : base_url('assets/img/default-avatar.png');
 $fallbackImagePath = base_url('assets/img/default-avatar.png');
 
 // Get validation errors service
@@ -46,7 +46,7 @@ $validation = \Config\Services::validation();
     <?php endif; ?>
     <hr>
 
-    <form action="<?= site_url('user/edit') ?>" method="post" enctype="multipart/form-data">
+    <form action="<?= base_url('user/edit') ?>" method="post" enctype="multipart/form-data">
         <?= csrf_field() ?>
 
         <div class="card shadow mb-4">
@@ -83,7 +83,7 @@ $validation = \Config\Services::validation();
                     <div class="col-sm-3">Keamanan Akun</div>
                     <div class="col-sm-9">
                         <p>Amankan akun Anda dengan lapisan verifikasi tambahan.</p>
-                        <a href="<?= site_url('user/reset_mfa') ?>" class="btn btn-primary">
+                        <a href="<?= base_url('user/reset_mfa') ?>" class="btn btn-primary">
                             Atur Ulang Multi-Factor Authentication (MFA)
                         </a>
                     </div>
@@ -142,7 +142,7 @@ $validation = \Config\Services::validation();
                     </div>
                     <div class="invalid-feedback d-block mt-1"><?= $validation->getError('file_skep_fasilitas') ?></div>
                     <?php if ($existing_skep_fasilitas_file): ?>
-                        <small class="form-text text-info mt-1">File SKEP Fasilitas saat ini: <a href="<?= site_url('user/downloadFile/' . esc($existing_skep_fasilitas_file)) ?>" target="_blank">Lihat File</a></small>
+                        <small class="form-text text-info mt-1">File SKEP Fasilitas saat ini: <a href="<?= base_url('user/downloadFile/' . esc($existing_skep_fasilitas_file)) ?>" target="_blank">Lihat File</a></small>
                     <?php endif; ?>
                 </div>
             </div>
@@ -254,7 +254,7 @@ $validation = \Config\Services::validation();
                     <div class="invalid-feedback d-block mt-1"><?= $validation->getError('ttd') ?></div>
                     <small class="form-text text-muted">Format: JPG, PNG, PDF. Maksimum ukuran 1MB.</small>
                     <?php if ($existing_ttd_file): ?>
-                        <small class="form-text text-info mt-1">File TTD saat ini: <a href="<?= site_url('user/downloadFile/' . esc($existing_ttd_file)) ?>" target="_blank">Lihat File</a></small>
+                        <small class="form-text text-info mt-1">File TTD saat ini: <a href="<?= base_url('user/downloadFile/' . esc($existing_ttd_file)) ?>" target="_blank">Lihat File</a></small>
                     <?php endif; ?>
                 </div>
             </div>
